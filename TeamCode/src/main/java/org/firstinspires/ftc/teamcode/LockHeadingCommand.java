@@ -37,15 +37,15 @@ public class LockHeadingCommand extends CommandBase {
     @Override
     public void initialize() {
         headingController.reset();
-
+        headingController.setSetPoint(0.0);
     }
 
     @Override
     public void execute() {
-        final double currentHeading = drive.getHeadingDegrees();
         targetHeadingDeg = targetHeadingSupplier.getAsDouble();
-        headingController.setSetPoint(targetHeadingDeg);
-        double rotation = headingController.calculate(currentHeading);
+        final double currentHeading = drive.getHeadingDegrees();
+        final double error = shortestDelta360(targetHeadingDeg, currentHeading);
+        double rotation = headingController.calculate(error);
         rotation = clamp(rotation, -Constants.Drive.TURN_MAX_OUTPUT, Constants.Drive.TURN_MAX_OUTPUT);
         drive.drive(strafeX.getAsDouble(), strafeY.getAsDouble(), rotation);
     }
@@ -57,6 +57,17 @@ public class LockHeadingCommand extends CommandBase {
     @Override
     public boolean isFinished() {
         return headingController.atSetPoint();
+    }
+
+    private double shortestDelta360(final double targetDeg, final double currentDeg) {
+        double error = targetDeg - currentDeg;
+        error = error % 360.0;
+        if (error > 180.0) {
+            error -= 360.0;
+        } else if (error < -180.0) {
+            error += 360.0;
+        }
+        return error;
     }
 
     private double clamp(final double value, final double min, final double max) {
