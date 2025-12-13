@@ -8,29 +8,27 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp(name = "TeleOp Drive (Command)", group = "Competition")
-public class TeleOp extends CommandOpMode {
+public class CommandTeleOp extends CommandOpMode {
 
     private DriveSubsystem drive;
     private GamepadEx driverRC;
-    private GamepadButton startBtn;
-    private GamepadButton lockHeadingBtn;
 
     @Override
     public void initialize() {
         drive = new DriveSubsystem(hardwareMap);
         driverRC = new GamepadEx(gamepad1);
 
-        startBtn = (new GamepadButton(driverRC, GamepadKeys.Button.START))
-            .whenPressed(() -> drive.resetHeading());
+        new GamepadButton(driverRC, GamepadKeys.Button.START)
+                .whenPressed(drive::resetHeading);
 
-        lockHeadingBtn = new GamepadButton(driverRC, GamepadKeys.Button.LEFT_BUMPER);
-        lockHeadingBtn.whileHeld(new LockHeadingCommand(
-                drive,
-                driverRC::getLeftX,
-                driverRC::getLeftY,
-                () -> 0.0,
-                2.0
-        ));
+        new GamepadButton(driverRC, GamepadKeys.Button.LEFT_BUMPER)
+                .whileHeld(new LockHeadingCommand(
+                        drive,
+                        driverRC::getLeftX,
+                        driverRC::getLeftY,
+                        () -> 0.0,
+                        2.0
+                ));
 
         register(drive);
         drive.setDefaultCommand(
@@ -43,13 +41,11 @@ public class TeleOp extends CommandOpMode {
                         drive
                 )
         );
-
     }
 
     @Override
     public void run() {
         super.run();
-
         driverRC.readButtons();
         telemetry.addData("Heading", drive.getHeadingDegrees());
         telemetry.update();

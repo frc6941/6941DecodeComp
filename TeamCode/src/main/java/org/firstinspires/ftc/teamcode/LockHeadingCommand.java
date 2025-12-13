@@ -30,7 +30,6 @@ public class LockHeadingCommand extends CommandBase {
                 Constants.Drive.TURN_kI,
                 Constants.Drive.TURN_kD
         );
-        headingController.enableContinuousInput(-180.0, 180.0);
         headingController.setTolerance(toleranceDeg);
         addRequirements(drive);
     }
