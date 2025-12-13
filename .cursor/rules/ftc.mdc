@@ -1,0 +1,185 @@
+---
+alwaysApply: true
+---
+🎯 Primary Goals
+
+Competition-safe code (FTC SDK + FTCLib only)
+
+Readable > clever
+
+Small, testable changes
+
+Driver-first behavior (predictable, smooth)
+
+Fail gracefully (no crashes mid‑match)
+
+🧱 Project Assumptions
+
+Language: Java
+
+Frameworks:
+
+FTC SDK (official)
+
+FTCLib (command-based preferred)
+
+Hardware:
+
+REV Control Hub / Expansion Hub
+
+Built-in IMU (FTC IMU, not legacy BNO055)
+
+IDE: Android Studio
+
+🧠 Architecture Rules
+1️⃣ Command-Based First
+
+Prefer FTCLib Command-Based structure:
+
+Subsystem → owns hardware
+
+Command → owns behavior
+
+RobotContainer → wiring, bindings
+
+Avoid putting logic directly in OpModes unless explicitly asked.
+
+Good:
+
+DriveSubsystem
+
+DefaultDriveCommand
+
+TurnToHeadingCommand
+
+Bad:
+
+Motor math inside runOpMode()
+
+2️⃣ One Responsibility per Class
+
+Subsystems:
+
+No gamepad reads
+
+No sleeps or blocking loops
+
+Commands:
+
+No hardwareMap access
+
+No static state
+
+🧭 IMU + Sensors Rules
+
+Use FTC IMU, wrapped or accessed via FTCLib if needed
+
+Always:
+
+Initialize IMU once
+
+Reset yaw on init or start
+
+Angles:
+
+Degrees by default
+
+CCW positive unless otherwise specified
+
+
+
+🔢 Constants & Tuning
+
+All tunables go in:
+
+Constants.java
+
+No magic numbers in logic
+
+Name constants clearly:
+
+MAX_DRIVE_SPEED
+
+TURN_kP
+
+DEADBAND
+
+🧹 Style & Cleanliness
+
+Max method length: ~30 lines
+
+Prefer early returns
+
+Descriptive names over comments
+
+Comment WHY, not WHAT
+
+🚨 Safety Rules (Non‑Negotiable)
+
+Motors default to BRAKE if they affect motion
+
+Servo positions clamped to [0.0, 1.0]
+
+Check for opModeIsActive() in loops
+
+Never block the main thread
+
+If unsure → choose the safer option.
+
+🧪 Debugging & Telemetry
+
+Minimal but useful telemetry:
+
+Heading
+
+Mode (Auto / TeleOp state)
+
+Errors or fallbacks
+
+Telemetry should not spam or lag control loops.
+
+⚡ Vibe Coding Mode (How Cursor Should Behave)
+
+When generating code:
+
+Start with a working baseline
+
+Optimize later, not first
+
+Prefer clarity over abstraction
+
+If unsure about FTC legality → warn explicitly
+
+When editing code:
+
+Change the smallest surface area possible
+
+Do not refactor unrelated files
+
+Preserve driver feel
+
+❌ What NOT to Do
+
+No threads unless explicitly requested
+
+No reflection or advanced Java tricks
+
+No external libraries unless FTC‑legal
+
+No guessing hardware names
+
+Ask before changing architecture.
+
+✅ Output Expectations
+
+Generated code should be:
+
+Compile-ready
+
+FTC legal
+
+Easily testable on a real robot
+
+If something is ambiguous, ask one clear question before proceeding.
+
+This project values vibes, but robots still obey physics. 🤖✨
