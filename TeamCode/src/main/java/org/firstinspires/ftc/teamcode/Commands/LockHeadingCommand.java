@@ -1,7 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.controller.PIDController;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 
 import java.util.function.DoubleSupplier;
 
@@ -13,18 +16,21 @@ public class LockHeadingCommand extends CommandBase {
     private final DoubleSupplier targetHeadingSupplier;
     private final PIDController headingController;
     private final double toleranceDeg;
+    private final Telemetry telemetry;
     private double targetHeadingDeg;
 
     public LockHeadingCommand(final DriveSubsystem drive,
                               final DoubleSupplier strafeX,
                               final DoubleSupplier strafeY,
                               final DoubleSupplier targetHeadingSupplier,
-                              final double toleranceDeg) {
+                              final double toleranceDeg,
+                              final Telemetry telemetry) {
         this.drive = drive;
         this.strafeX = strafeX;
         this.strafeY = strafeY;
         this.targetHeadingSupplier = targetHeadingSupplier;
         this.toleranceDeg = toleranceDeg;
+        this.telemetry = telemetry;
         headingController = new PIDController(
                 Constants.Drive.TURN_kP,
                 Constants.Drive.TURN_kI,
@@ -43,10 +49,9 @@ public class LockHeadingCommand extends CommandBase {
     @Override
     public void execute() {
         targetHeadingDeg = targetHeadingSupplier.getAsDouble();
-        final double currentHeading = drive.getHeadingDegrees();
-        final double error = shortestDelta360(targetHeadingDeg, currentHeading);
+        double currentHeading = drive.getHeadingDegrees();
+        double error = shortestDelta360(currentHeading,targetHeadingDeg);
         double rotation = headingController.calculate(error);
-        rotation = clamp(rotation, -Constants.Drive.TURN_MAX_OUTPUT, Constants.Drive.TURN_MAX_OUTPUT);
         drive.drive(strafeX.getAsDouble(), strafeY.getAsDouble(), rotation);
     }
 
