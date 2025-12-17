@@ -36,8 +36,8 @@ public final class Constants {
         public static final Motor.GoBILDA GEARING = Motor.GoBILDA.BARE;
         public static final boolean LEADER_INVERTED = false;
         public static final boolean FOLLOWER_INVERTED = true;
-        public static final double LATCH_CLOSED_POS = 0.0;
-        public static final double LATCH_OPEN_POS = 0.5;
+        public static final double LATCH_CLOSED_POS = 0.4;
+        public static final double LATCH_OPEN_POS = 0;
 
         private Shooter() {
         }
@@ -46,9 +46,9 @@ public final class Constants {
     public static final class Feeder {
         public static final String INTAKE_ROLLER_NAME = "intakeRoller";
         public static final String OUTTAKE_ROLLER_NAME = "outtakeRoller";
-        public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1620;
-        public static final boolean INTAKE_INVERTED = false;
-        public static final boolean OUTTAKE_INVERTED = false;
+        public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1150;
+        public static final boolean INTAKE_INVERTED = true;
+        public static final boolean OUTTAKE_INVERTED = true;
 
         private Feeder() {
         }

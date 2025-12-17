@@ -52,8 +52,8 @@ public class CommandTeleOp extends CommandOpMode {
         );
 
         leftTrigger.whileActiveContinuous(
-                new ParallelCommandGroup(
-                        new PreShootCommand(shooter),
+                //new ParallelCommandGroup(
+                //        new PreShootCommand(shooter),
                         new LockHeadingCommand(
                                 drive,
                                 driverRC::getLeftX,
@@ -62,7 +62,7 @@ public class CommandTeleOp extends CommandOpMode {
                                 2.0,
                                 telemetry
                         )
-                )
+                //)
         );
 
         rightTrigger.whileActiveContinuous(
@@ -89,7 +89,15 @@ public class CommandTeleOp extends CommandOpMode {
                         () -> {
                             shooter.setOpenLoop(0.3);
                             shooter.closeLatch();
-                        }
+                        },
+                        shooter
+                )
+
+        );
+        feeder.setDefaultCommand(
+                new RunCommand(
+                        () -> feeder.stop(),
+                        feeder
                 )
         );
 

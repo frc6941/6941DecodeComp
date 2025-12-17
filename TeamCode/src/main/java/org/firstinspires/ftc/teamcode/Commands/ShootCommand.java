@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
 public class ShootCommand extends SequentialCommandGroup {
 
-    private static final double POWER = 0.8;
-    private static final long LATCH_LEAD_TIME_MS = 100;
+    private static final double POWER = 1;
+    private static final long LATCH_LEAD_TIME_MS = 250;
 
     public ShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder) {
         super(
