@@ -40,6 +40,13 @@ public final class display {
         drawArrow(packet, pose, "#00FFFF");
         if (ghost != null) {
             drawArrow(packet, ghost, "#FF66FF");
+            packet.put("LL_poseX_in", ghost.getX());
+            packet.put("LL_poseY_in", ghost.getY());
+            packet.put("LL_poseHeading_deg", Math.toDegrees(ghost.getHeading()));
+        } else {
+            packet.put("LL_poseX_in", 0);
+            packet.put("LL_poseY_in", 0);
+            packet.put("LL_poseHeading_deg", 0);
         }
 
         if (trail.size() > 1) {

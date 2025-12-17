@@ -15,8 +15,9 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 /**
- * Limelight3A subsystem using MT2 (vision + gyro fusion). Call updateWithImuHeading()
- * each loop before consuming pose to keep LL aligned to the current yaw.
+ * Limelight3A subsystem using MT2 (vision + gyro fusion). Call
+ * updateWithImuHeading() each loop before consuming pose to keep LL aligned to
+ * the current yaw.
  */
 public class LimelightSubsystem extends SubsystemBase {
 
@@ -31,7 +32,8 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     /**
-     * Update Limelight with the current gyro heading (degrees, CCW+) and pull the latest result.
+     * Update Limelight with the current gyro heading (degrees, CCW+) and pull
+     * the latest result.
      */
     public void updateWithImuHeading(final double headingDegrees) {
         limelight.updateRobotOrientation(headingDegrees);
@@ -49,7 +51,8 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     /**
-     * Robot pose estimate from Limelight MT2, returned in inches and radians (RR Pose2d).
+     * Robot pose estimate from Limelight MT2, returned in inches and radians
+     * (RR Pose2d).
      */
     public Optional<Pose2d> getPoseEstimate() {
         if (latest != null && latest.isValid()) {
@@ -58,8 +61,8 @@ public class LimelightSubsystem extends SubsystemBase {
                 botpose = latest.getBotpose_MT2();
             }
             if (botpose != null) {
-                final double xIn = botpose.getPosition().y * M_TO_IN;
-                final double yIn = botpose.getPosition().x * M_TO_IN;
+                final double xIn = botpose.getPosition().x * M_TO_IN;
+                final double yIn = botpose.getPosition().y * M_TO_IN;
                 // Limelight orientation is reported in degrees; convert to radians for RR.
                 final double headingRad = Math.toRadians(botpose.getOrientation().getYaw());
                 return Optional.of(new Pose2d(xIn, yIn, headingRad));
@@ -69,7 +72,8 @@ public class LimelightSubsystem extends SubsystemBase {
     }
 
     /**
-     * Distance from robot origin to target in meters using MT2 pose if available.
+     * Distance from robot origin to target in meters using MT2 pose if
+     * available.
      */
     public OptionalDouble getDistanceMeters() {
         if (latest != null && latest.isValid()) {
@@ -88,4 +92,3 @@ public class LimelightSubsystem extends SubsystemBase {
         return OptionalDouble.empty();
     }
 }
-

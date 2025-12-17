@@ -68,8 +68,11 @@ public class CommandTeleOp extends CommandOpMode {
         rightTrigger.whileActiveContinuous(
                 new ShootCommand(shooter, feeder)
         );
-        new GamepadButton(driverRC, GamepadKeys.Button.LEFT_BUMPER)
-                .whenPressed(new IntakeCommand(feeder));
+        leftTrigger.whileActiveContinuous(
+                new IntakeCommand(feeder)
+        );
+//        new GamepadButton(driverRC, GamepadKeys.Button.LEFT_BUMPER)
+//                .whenPressed(new IntakeCommand(feeder));
 
         register(drive);
         register(shooter);
@@ -109,7 +112,7 @@ public class CommandTeleOp extends CommandOpMode {
         driverRC.readButtons();
 
         // Update LL with current gyro, then fuse vision if valid
-        limelight.updateWithImuHeading(drive.getHeadingDegrees());
+        limelight.updateWithImuHeading(drive.getHeadingDegrees()- DriveSubsystem.GYRO_HEADING_OFFSET_DEG);
         limelight.getPoseEstimate().ifPresent(visionPose -> {
             final double distanceMeters = limelight.getDistanceMeters().orElse(Double.NaN);
             if (!Double.isNaN(distanceMeters)) {

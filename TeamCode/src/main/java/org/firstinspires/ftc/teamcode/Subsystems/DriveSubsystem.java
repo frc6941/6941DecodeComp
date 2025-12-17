@@ -18,6 +18,7 @@ public class DriveSubsystem extends SubsystemBase {
     // Pinpoint expects offsets in mm: x = sideways (left +), y = forward +
     private static final double PINPOINT_X_OFFSET_MM = -0.05;
     private static final double PINPOINT_Y_OFFSET_MM = -180.0;
+    public static final double GYRO_HEADING_OFFSET_DEG = 180;
 
     private final MecanumDrive drive;
     private final GoBildaPinpointDriver pinpoint;
@@ -38,12 +39,10 @@ public class DriveSubsystem extends SubsystemBase {
         pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         pinpoint.setEncoderDirections(
                 GoBildaPinpointDriver.EncoderDirection.REVERSED,
-                GoBildaPinpointDriver.EncoderDirection.REVERSED
+                GoBildaPinpointDriver.EncoderDirection.FORWARD
         );
         pinpoint.resetPosAndIMU();
     }
-
-
 
     private Motor buildDriveMotor(final HardwareMap hardwareMap, final String name) {
         final Motor motor = new Motor(hardwareMap, name, Motor.GoBILDA.RPM_435);
@@ -86,8 +85,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Blend the current Pinpoint pose with a vision pose using a distance-based gain,
-     * then commit the fused pose. Returns the fused pose.
+     * Blend the current Pinpoint pose with a vision pose using a distance-based
+     * gain, then commit the fused pose. Returns the fused pose.
      */
     public Pose2d fuseVisionPose(final Pose2d visionPose, final double distanceMeters) {
         final Pose2d base = getPose();
@@ -99,9 +98,10 @@ public class DriveSubsystem extends SubsystemBase {
         return fused;
     }
 
-
     public double getHeadingDegrees() {
-        return Math.toDegrees(getPose().getHeading());
+        double heading = Math.toDegrees(getPose().getHeading());
+        heading += GYRO_HEADING_OFFSET_DEG; // 添加 gyro offset 修正旋转中心
+        return heading;
     }
 
     public void resetHeading() {
@@ -119,8 +119,12 @@ public class DriveSubsystem extends SubsystemBase {
 
     private double angleWrap(final double angleRad) {
         double wrapped = angleRad;
-        while (wrapped > Math.PI) wrapped -= 2.0 * Math.PI;
-        while (wrapped < -Math.PI) wrapped += 2.0 * Math.PI;
+        while (wrapped > Math.PI) {
+            wrapped -= 2.0 * Math.PI;
+        }
+        while (wrapped < -Math.PI) {
+            wrapped += 2.0 * Math.PI;
+        }
         return wrapped;
     }
 
@@ -136,4 +140,3 @@ public class DriveSubsystem extends SubsystemBase {
         );
     }
 }
-
