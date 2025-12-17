@@ -51,7 +51,7 @@ public class CommandTeleOp extends CommandOpMode {
                 () -> driverRC.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
         );
 
-        leftTrigger.whileActiveContinuous(
+        rightTrigger.whileActiveContinuous(
                 //new ParallelCommandGroup(
                 //        new PreShootCommand(shooter),
                         new LockHeadingCommand(
@@ -71,8 +71,6 @@ public class CommandTeleOp extends CommandOpMode {
         leftTrigger.whileActiveContinuous(
                 new IntakeCommand(feeder)
         );
-//        new GamepadButton(driverRC, GamepadKeys.Button.LEFT_BUMPER)
-//                .whenPressed(new IntakeCommand(feeder));
 
         register(drive);
         register(shooter);
