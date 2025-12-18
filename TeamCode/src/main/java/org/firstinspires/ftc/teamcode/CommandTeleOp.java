@@ -56,8 +56,8 @@ public class CommandTeleOp extends CommandOpMode {
                 //        new PreShootCommand(shooter),
                         new LockHeadingCommand(
                                 drive,
-                                driverRC::getLeftX,
-                                driverRC::getLeftY,
+                                () -> -driverRC.getLeftX(),
+                                () -> driverRC.getLeftY(),
                                 () -> 45 + 90,
                                 2.0,
                                 telemetry
@@ -78,7 +78,7 @@ public class CommandTeleOp extends CommandOpMode {
         drive.setDefaultCommand(
                 new RunCommand(
                         () -> drive.drive(
-                                driverRC.getLeftX(),
+                                -driverRC.getLeftX(),
                                 driverRC.getLeftY(),
                                 -driverRC.getRightX()
                         ),
