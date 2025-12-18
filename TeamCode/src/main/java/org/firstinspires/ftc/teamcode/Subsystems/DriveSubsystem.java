@@ -63,7 +63,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void drive(final double leftX, final double leftY, final double rightX) {
         if (fieldCentricEnabled) {
-            drive.driveFieldCentric(leftX, leftY, rightX, getHeadingDegrees(), false);
+            drive.driveFieldCentric(leftX, leftY, rightX, getFieldCentricHeadingDegrees(), false);
         } else {
             drive.driveRobotCentric(leftX, leftY, rightX, false);
         }
@@ -104,8 +104,24 @@ public class DriveSubsystem extends SubsystemBase {
         return heading;
     }
 
+    /**
+     * 返回用于 field-centric 的 heading（在标准 FTC 场地坐标系基础上，按驾驶员站位做视角旋转）。
+     * - Red 视角：不旋转
+     * - Blue 视角：额外旋转 180°（让“推前=远离驾驶员”）
+     */
+    public double getFieldCentricHeadingDegrees() {
+        return getHeadingDegrees() + getDriverStationPerspectiveOffsetDeg();
+    }
+
     public void resetHeading() {
         pinpoint.resetPosAndIMU();
+    }
+
+    private double getDriverStationPerspectiveOffsetDeg() {
+        if (Constants.Drive.DRIVER_STATION_PERSPECTIVE == Constants.Drive.DriverStationPerspective.BLUE) {
+            return Constants.Drive.BLUE_PERSPECTIVE_ROTATION_DEG;
+        }
+        return 0.0;
     }
 
     private double computeVisionGain(final double distanceMeters) {

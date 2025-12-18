@@ -15,6 +15,13 @@ public class ShooterSubsystem extends SubsystemBase {
     private final MotorGroup shooterGroup;
     private final Servo latch;
 
+    private double lastVeloKp = Double.NaN;
+    private double lastVeloKi = Double.NaN;
+    private double lastVeloKd = Double.NaN;
+    private double lastKs = Double.NaN;
+    private double lastKv = Double.NaN;
+    private double lastKa = Double.NaN;
+
     public ShooterSubsystem(final HardwareMap hardwareMap) {
         leader = buildShooterMotor(
                 hardwareMap,
@@ -30,6 +37,34 @@ public class ShooterSubsystem extends SubsystemBase {
 
         latch = hardwareMap.get(Servo.class, Constants.Shooter.LATCH_NAME);
         latch.setPosition(Constants.Shooter.LATCH_CLOSED_POS);
+    }
+
+    /**
+     * 通过 FTCLib Motor 内置速度环 PIDF + feedforward 进行调参。
+     * 这些参数可通过 FTC Dashboard（@Config）远程修改。
+     */
+    public void applyVelocityTuning(final double kP,
+                                    final double kI,
+                                    final double kD,
+                                    final double kS,
+                                    final double kV,
+                                    final double kA) {
+        // 只在参数变化时下发，避免每周期重复写
+        if (kP != lastVeloKp || kI != lastVeloKi || kD != lastVeloKd) {
+            leader.setVeloCoefficients(kP, kI, kD);
+            follower.setVeloCoefficients(kP, kI, kD);
+            lastVeloKp = kP;
+            lastVeloKi = kI;
+            lastVeloKd = kD;
+        }
+
+        if (kS != lastKs || kV != lastKv || kA != lastKa) {
+            leader.setFeedforwardCoefficients(kS, kV, kA);
+            follower.setFeedforwardCoefficients(kS, kV, kA);
+            lastKs = kS;
+            lastKv = kV;
+            lastKa = kA;
+        }
     }
 
     public void setOpenLoop(final double power) {

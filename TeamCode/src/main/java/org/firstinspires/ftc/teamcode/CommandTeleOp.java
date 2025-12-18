@@ -44,6 +44,12 @@ public class CommandTeleOp extends CommandOpMode {
         new GamepadButton(driverRC, GamepadKeys.Button.START)
                 .whenPressed(drive::resetHeading);
 
+        // 驾驶员站位视角：Red=0°，Blue=180°（用于 field-centric 变换）
+        new GamepadButton(driverRC, GamepadKeys.Button.DPAD_RIGHT)
+                .whenPressed(() -> Constants.Drive.DRIVER_STATION_PERSPECTIVE = Constants.Drive.DriverStationPerspective.RED);
+        new GamepadButton(driverRC, GamepadKeys.Button.DPAD_LEFT)
+                .whenPressed(() -> Constants.Drive.DRIVER_STATION_PERSPECTIVE = Constants.Drive.DriverStationPerspective.BLUE);
+
         final Trigger leftTrigger = new Trigger(
                 () -> driverRC.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5
         );
@@ -123,6 +129,7 @@ public class CommandTeleOp extends CommandOpMode {
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
         display.sendPoseWithGhost(pose,ghost);
+        telemetry.addData("Driver Perspective", Constants.Drive.DRIVER_STATION_PERSPECTIVE);
         telemetry.update();
     }
 }
