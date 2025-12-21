@@ -2,20 +2,16 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
-import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
-import org.firstinspires.ftc.teamcode.Commands.PreShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.ShootCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
@@ -50,26 +46,32 @@ public class CommandTeleOp extends CommandOpMode {
         final Trigger rightTrigger = new Trigger(
                 () -> driverRC.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.5
         );
-
-        rightTrigger.whileActiveContinuous(
-                //new ParallelCommandGroup(
-                //        new PreShootCommand(shooter),
-                        new LockHeadingCommand(
-                                drive,
-                                () -> -driverRC.getLeftX(),
-                                () -> driverRC.getLeftY(),
-                                () -> 45 + 90,
-                                2.0,
-                                telemetry
-                        )
-                //)
+        final Trigger leftBumper = new Trigger(
+                () -> driverRC.getButton(GamepadKeys.Button.LEFT_BUMPER)
         );
+
+//        rightTrigger.whileActiveContinuous(
+//                //new ParallelCommandGroup(
+//                //        new PreShootCommand(shooter),
+//                        new LockHeadingCommand(
+//                                drive,
+//                                () -> -driverRC.getLeftX(),
+//                                () -> driverRC.getLeftY(),
+//                                () -> 45 + 90,
+//                                2.0,
+//                                telemetry
+//                        )
+//                //)
+//        );
 
         rightTrigger.whileActiveContinuous(
                 new ShootCommand(shooter, feeder)
         );
         leftTrigger.whileActiveContinuous(
-                new IntakeCommand(feeder)
+                new IntakeCommand(feeder, 1, 0.7)
+        );
+        leftBumper.whileActiveContinuous(
+                new IntakeCommand(feeder, -1, -0.7)
         );
 
         register(drive);
@@ -88,7 +90,7 @@ public class CommandTeleOp extends CommandOpMode {
         shooter.setDefaultCommand(
                 new RunCommand(
                         () -> {
-                            shooter.setOpenLoop(0.3);
+                            shooter.setOpenLoop(0.6);
                             shooter.closeLatch();
                         },
                         shooter
@@ -110,7 +112,7 @@ public class CommandTeleOp extends CommandOpMode {
         driverRC.readButtons();
 
         // Update LL with current gyro, then fuse vision if valid
-        limelight.updateWithImuHeading(drive.getHeadingDegrees()- DriveSubsystem.GYRO_HEADING_OFFSET_DEG);
+        limelight.updateWithImuHeading(drive.getHeadingDegrees() - DriveSubsystem.GYRO_HEADING_OFFSET_DEG);
         limelight.getPoseEstimate().ifPresent(visionPose -> {
             final double distanceMeters = limelight.getDistanceMeters().orElse(Double.NaN);
             if (!Double.isNaN(distanceMeters)) {
@@ -122,7 +124,7 @@ public class CommandTeleOp extends CommandOpMode {
 
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
-        display.sendPoseWithGhost(pose,ghost);
+        display.sendPoseWithGhost(pose, ghost);
         telemetry.update();
     }
 }
