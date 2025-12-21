@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
 public class PreShootCommand extends CommandBase {
 
-    private static final double DEFAULT_POWER = 0.8;
+    private static final double DEFAULT_POWER = 0.6;
 
     private final ShooterSubsystem shooter;
     private final double power;

@@ -7,7 +7,6 @@ import com.arcrobotics.ftclib.drivebase.MecanumDrive;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -18,11 +17,10 @@ import org.firstinspires.ftc.teamcode.Constants;
 
 public class DriveSubsystem extends SubsystemBase {
 
+    public static final double GYRO_HEADING_OFFSET_DEG = 180;
     // Pinpoint expects offsets in mm: x = sideways (left +), y = forward +
     private static final double PINPOINT_X_OFFSET_MM = -0.05;
     private static final double PINPOINT_Y_OFFSET_MM = -180.0;
-    public static final double GYRO_HEADING_OFFSET_DEG = 180;
-
     private final MecanumDrive drive;
     private final GoBildaPinpointDriver pinpoint;
     private final Telemetry telemetry;
@@ -30,6 +28,7 @@ public class DriveSubsystem extends SubsystemBase {
     private Pose2d previousRawPose = new Pose2d(0, 0, 0);
     private Pose2d poseOffset = new Pose2d(0, 0, 0);
     private boolean fieldCentricEnabled = Constants.Drive.DEFAULT_FIELD_CENTRIC;
+    private double driverInputOffsetDeg = Constants.Drive.DRIVER_INPUT_OFFSET_BLUE_DEG;
 
     public DriveSubsystem(final HardwareMap hardwareMap, final Telemetry telemetry) {
         this.telemetry = telemetry;
@@ -66,13 +65,13 @@ public class DriveSubsystem extends SubsystemBase {
                 p.getY(DistanceUnit.INCH),
                 p.getHeading(AngleUnit.RADIANS)
         );
-        
+
         // 计算位移增量
         double deltaX = rawPose.getX() - previousRawPose.getX();
         double deltaY = rawPose.getY() - previousRawPose.getY();
         double deltaHeading = rawPose.getHeading() - previousRawPose.getHeading();
         double deltaDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        
+
         // 记录到telemetry
         if (telemetry != null) {
             telemetry.addData("Pinpoint Delta X", "%.3f in", deltaX);
@@ -84,10 +83,32 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void drive(final double leftX, final double leftY, final double rightX) {
         if (fieldCentricEnabled) {
-            drive.driveFieldCentric(leftX, leftY, rightX, getHeadingDegrees(), false);
+            final double rotatedX;
+            final double rotatedY;
+            if (Math.abs(driverInputOffsetDeg) < 1e-9) {
+                rotatedX = leftX;
+                rotatedY = leftY;
+            } else {
+                final double[] rotated = rotateVector(leftX, leftY, driverInputOffsetDeg);
+                rotatedX = rotated[0];
+                rotatedY = rotated[1];
+            }
+            drive.driveFieldCentric(rotatedX, rotatedY, rightX, getHeadingDegrees(), false);
         } else {
             drive.driveRobotCentric(leftX, leftY, rightX, false);
         }
+    }
+
+    /**
+     * Set a driver-station perspective offset (degrees) applied to the translation stick
+     * before field-centric transform. Typical usage: blue=0°, red=180°.
+     */
+    public void setDriverInputOffsetDeg(final double offsetDeg) {
+        driverInputOffsetDeg = offsetDeg;
+    }
+
+    public double getDriverInputOffsetDeg() {
+        return driverInputOffsetDeg;
     }
 
     public void stop() {
@@ -151,6 +172,16 @@ public class DriveSubsystem extends SubsystemBase {
 
     private double clamp(final double value, final double min, final double max) {
         return Math.max(min, Math.min(max, value));
+    }
+
+    // Rotate (x,y) by +deg CCW
+    private double[] rotateVector(final double x, final double y, final double deg) {
+        final double rad = Math.toRadians(deg);
+        final double cos = Math.cos(rad);
+        final double sin = Math.sin(rad);
+        final double rx = x * cos - y * sin;
+        final double ry = x * sin + y * cos;
+        return new double[]{rx, ry};
     }
 
     private Pose2d addOffset(final Pose2d base, final Pose2d offset) {

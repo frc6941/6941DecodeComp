@@ -27,6 +27,13 @@ public class CommandTeleOp extends CommandOpMode {
     private GamepadEx driverRC;
     private LimelightSubsystem limelight;
 
+    private enum DriverAlliance {
+        BLUE,
+        RED
+    }
+
+    private DriverAlliance driverAlliance = DriverAlliance.BLUE;
+
     @Override
     public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -35,6 +42,14 @@ public class CommandTeleOp extends CommandOpMode {
         feeder = new FeederSubsystem(hardwareMap);
         driverRC = new GamepadEx(gamepad1);
         limelight = new LimelightSubsystem(hardwareMap);
+
+        // Default to BLUE (0°). Driver can choose in init using DPAD:
+        // DPAD_LEFT = RED (180°), DPAD_RIGHT = BLUE (0°)
+        applyDriverAlliance(DriverAlliance.BLUE);
+        new GamepadButton(driverRC, GamepadKeys.Button.DPAD_LEFT)
+                .whenPressed(() -> applyDriverAlliance(DriverAlliance.RED));
+        new GamepadButton(driverRC, GamepadKeys.Button.DPAD_RIGHT)
+                .whenPressed(() -> applyDriverAlliance(DriverAlliance.BLUE));
 
         new GamepadButton(driverRC, GamepadKeys.Button.START)
                 .whenPressed(drive::resetHeading);
@@ -122,10 +137,21 @@ public class CommandTeleOp extends CommandOpMode {
         telemetry.addData("LX(right +)", driverRC.getLeftX());
         telemetry.addData("LY(fwd +)", driverRC.getLeftY());
         telemetry.addData("RX(ccw +)", -driverRC.getRightX());
+        telemetry.addData("Driver Alliance", driverAlliance);
+        telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
 
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
         display.sendPoseWithGhost(pose, ghost);
         telemetry.update();
+    }
+
+    private void applyDriverAlliance(final DriverAlliance alliance) {
+        driverAlliance = alliance;
+        if (alliance == DriverAlliance.RED) {
+            drive.setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_RED_DEG);
+        } else {
+            drive.setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_BLUE_DEG);
+        }
     }
 }

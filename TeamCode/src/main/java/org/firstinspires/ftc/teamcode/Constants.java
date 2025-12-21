@@ -20,6 +20,10 @@ public final class Constants {
         public static final RevHubOrientationOnRobot.UsbFacingDirection IMU_USB_DIRECTION =
                 RevHubOrientationOnRobot.UsbFacingDirection.UP;
         public static final boolean DEFAULT_FIELD_CENTRIC = true;
+
+        public static final double DRIVER_INPUT_OFFSET_BLUE_DEG = -90.0;
+        public static final double DRIVER_INPUT_OFFSET_RED_DEG = 90.0;
+
         public static final double TURN_kP = 0.05;
         public static final double TURN_kI = 0.0;
         public static final double TURN_kD = 0.000;
