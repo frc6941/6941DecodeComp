@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
-
 @TeleOp(name = "TeleOp Drive (Command)", group = "Competition")
 public class CommandTeleOp extends CommandOpMode {
 
@@ -31,7 +30,7 @@ public class CommandTeleOp extends CommandOpMode {
     @Override
     public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        drive = new DriveSubsystem(hardwareMap);
+        drive = new DriveSubsystem(hardwareMap, telemetry);
         shooter = new ShooterSubsystem(hardwareMap);
         feeder = new FeederSubsystem(hardwareMap);
         driverRC = new GamepadEx(gamepad1);
@@ -63,7 +62,6 @@ public class CommandTeleOp extends CommandOpMode {
 //                        )
 //                //)
 //        );
-
         rightTrigger.whileActiveContinuous(
                 new ShootCommand(shooter, feeder)
         );
@@ -80,9 +78,9 @@ public class CommandTeleOp extends CommandOpMode {
         drive.setDefaultCommand(
                 new RunCommand(
                         () -> drive.drive(
-                                -driverRC.getLeftX(),
-                                driverRC.getLeftY(),
-                                -driverRC.getRightX()
+                                driverRC.getLeftX(), // right +
+                                driverRC.getLeftY(), // forward +
+                                -driverRC.getRightX() // ccw + (left+)
                         ),
                         drive
                 )
@@ -95,7 +93,6 @@ public class CommandTeleOp extends CommandOpMode {
                         },
                         shooter
                 )
-
         );
         feeder.setDefaultCommand(
                 new RunCommand(
@@ -122,10 +119,13 @@ public class CommandTeleOp extends CommandOpMode {
             }
         });
 
+        telemetry.addData("LX(right +)", driverRC.getLeftX());
+        telemetry.addData("LY(fwd +)", driverRC.getLeftY());
+        telemetry.addData("RX(ccw +)", -driverRC.getRightX());
+
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
         display.sendPoseWithGhost(pose, ghost);
         telemetry.update();
     }
 }
-

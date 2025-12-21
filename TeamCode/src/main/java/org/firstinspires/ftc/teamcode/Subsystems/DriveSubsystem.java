@@ -1,3 +1,4 @@
+
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,10 +9,12 @@ import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Constants;
+
 
 public class DriveSubsystem extends SubsystemBase {
 
@@ -22,11 +25,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final MecanumDrive drive;
     private final GoBildaPinpointDriver pinpoint;
+    private final Telemetry telemetry;
     private Pose2d rawPose = new Pose2d(0, 0, 0);
+    private Pose2d previousRawPose = new Pose2d(0, 0, 0);
     private Pose2d poseOffset = new Pose2d(0, 0, 0);
     private boolean fieldCentricEnabled = Constants.Drive.DEFAULT_FIELD_CENTRIC;
 
-    public DriveSubsystem(final HardwareMap hardwareMap) {
+    public DriveSubsystem(final HardwareMap hardwareMap, final Telemetry telemetry) {
+        this.telemetry = telemetry;
         final Motor frontLeft = buildDriveMotor(hardwareMap, Constants.Drive.FRONT_LEFT_NAME);
         final Motor frontRight = buildDriveMotor(hardwareMap, Constants.Drive.FRONT_RIGHT_NAME);
         final Motor backLeft = buildDriveMotor(hardwareMap, Constants.Drive.BACK_LEFT_NAME);
@@ -54,11 +60,26 @@ public class DriveSubsystem extends SubsystemBase {
     public void periodic() {
         pinpoint.update();
         final Pose2D p = pinpoint.getPosition();
+        previousRawPose = rawPose;
         rawPose = new Pose2d(
                 p.getX(DistanceUnit.INCH),
                 p.getY(DistanceUnit.INCH),
                 p.getHeading(AngleUnit.RADIANS)
         );
+        
+        // 计算位移增量
+        double deltaX = rawPose.getX() - previousRawPose.getX();
+        double deltaY = rawPose.getY() - previousRawPose.getY();
+        double deltaHeading = rawPose.getHeading() - previousRawPose.getHeading();
+        double deltaDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // 记录到telemetry
+        if (telemetry != null) {
+            telemetry.addData("Pinpoint Delta X", "%.3f in", deltaX);
+            telemetry.addData("Pinpoint Delta Y", "%.3f in", deltaY);
+            telemetry.addData("Pinpoint Delta Distance", "%.3f in", deltaDistance);
+            telemetry.addData("Pinpoint Delta Heading", "%.3f rad", deltaHeading);
+        }
     }
 
     public void drive(final double leftX, final double leftY, final double rightX) {
