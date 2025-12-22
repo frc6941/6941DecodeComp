@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.Constants;
@@ -10,6 +11,8 @@ public class FeederSubsystem extends SubsystemBase {
 
     private final Motor intakeRoller;
     private final Motor outtakeRoller;
+    private final DcMotorEx intakeEx;
+    private final DcMotorEx outtakeEx;
 
     public FeederSubsystem(final HardwareMap hardwareMap) {
         intakeRoller = buildRollerMotor(
@@ -22,6 +25,21 @@ public class FeederSubsystem extends SubsystemBase {
                 Constants.Feeder.OUTTAKE_ROLLER_NAME,
                 Constants.Feeder.OUTTAKE_INVERTED
         );
+
+        DcMotorEx tmpIntake;
+        DcMotorEx tmpOuttake;
+        try {
+            tmpIntake = hardwareMap.get(DcMotorEx.class, Constants.Feeder.INTAKE_ROLLER_NAME);
+        } catch (Exception ignored) {
+            tmpIntake = null;
+        }
+        try {
+            tmpOuttake = hardwareMap.get(DcMotorEx.class, Constants.Feeder.OUTTAKE_ROLLER_NAME);
+        } catch (Exception ignored) {
+            tmpOuttake = null;
+        }
+        intakeEx = tmpIntake;
+        outtakeEx = tmpOuttake;
     }
 
     public void setIntakeOpenLoop(final double power) {
@@ -45,11 +63,27 @@ public class FeederSubsystem extends SubsystemBase {
     }
 
     public double getIntakeVelocityRpm() {
-        return intakeRoller.getCorrectedVelocity();
+        if (intakeEx != null) {
+            final double ticksPerSec = intakeEx.getVelocity();
+            return (ticksPerSec * 60.0) / Constants.Shooter.TICKS_PER_REV_OUTPUT;
+        }
+        try {
+            return intakeRoller.getCorrectedVelocity();
+        } catch (Exception ignored) {
+            return 0.0;
+        }
     }
 
     public double getOuttakeVelocityRpm() {
-        return outtakeRoller.getCorrectedVelocity();
+        if (outtakeEx != null) {
+            final double ticksPerSec = outtakeEx.getVelocity();
+            return (ticksPerSec * 60.0) / Constants.Shooter.TICKS_PER_REV_OUTPUT;
+        }
+        try {
+            return outtakeRoller.getCorrectedVelocity();
+        } catch (Exception ignored) {
+            return 0.0;
+        }
     }
 
     public void stop() {

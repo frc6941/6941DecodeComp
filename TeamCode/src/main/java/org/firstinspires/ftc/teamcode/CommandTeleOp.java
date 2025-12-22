@@ -26,12 +26,6 @@ public class CommandTeleOp extends CommandOpMode {
     private FeederSubsystem feeder;
     private GamepadEx driverRC;
     private LimelightSubsystem limelight;
-
-    private enum DriverAlliance {
-        BLUE,
-        RED
-    }
-
     private DriverAlliance driverAlliance = DriverAlliance.BLUE;
 
     @Override
@@ -43,8 +37,6 @@ public class CommandTeleOp extends CommandOpMode {
         driverRC = new GamepadEx(gamepad1);
         limelight = new LimelightSubsystem(hardwareMap);
 
-        // Default to BLUE (0°). Driver can choose in init using DPAD:
-        // DPAD_LEFT = RED (180°), DPAD_RIGHT = BLUE (0°)
         applyDriverAlliance(DriverAlliance.BLUE);
         new GamepadButton(driverRC, GamepadKeys.Button.DPAD_LEFT)
                 .whenPressed(() -> applyDriverAlliance(DriverAlliance.RED));
@@ -81,10 +73,10 @@ public class CommandTeleOp extends CommandOpMode {
                 new ShootCommand(shooter, feeder)
         );
         leftTrigger.whileActiveContinuous(
-                new IntakeCommand(feeder, 1, 0.7)
+                new IntakeCommand(feeder, 0.7, 0.7)
         );
         leftBumper.whileActiveContinuous(
-                new IntakeCommand(feeder, -1, -0.7)
+                new IntakeCommand(feeder, -0.7, -0.7)
         );
 
         register(drive);
@@ -139,6 +131,13 @@ public class CommandTeleOp extends CommandOpMode {
         telemetry.addData("RX(ccw +)", -driverRC.getRightX());
         telemetry.addData("Driver Alliance", driverAlliance);
         telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
+        telemetry.addData("Shooter Rpm", shooter.getVelocityRpm());
+//        telemetry.addData("Leader Rpm", shooter.getLeaderVelocityRpm());
+//        telemetry.addData("Follower Rpm", shooter.getFollowerVelocityRpm());
+//        telemetry.addData("Shooter Rps", shooter.getVelocityRps());
+//        telemetry.addData("Shooter tpsEst", shooter.getDebugTicksPerSec());
+//        telemetry.addData("Shooter targetRps", shooter.getTargetRps());
+//        telemetry.addData("Shooter closedLoop", shooter.isVelocityClosedLoopEnabled());
 
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
@@ -153,5 +152,10 @@ public class CommandTeleOp extends CommandOpMode {
         } else {
             drive.setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_BLUE_DEG);
         }
+    }
+
+    private enum DriverAlliance {
+        BLUE,
+        RED
     }
 }

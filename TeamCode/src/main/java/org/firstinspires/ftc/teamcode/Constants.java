@@ -9,16 +9,17 @@ public final class Constants {
     }
 
     public static final class Drive {
+
         public static final String FRONT_LEFT_NAME = "LF";
         public static final String FRONT_RIGHT_NAME = "RF";
         public static final String BACK_LEFT_NAME = "LB";
         public static final String BACK_RIGHT_NAME = "RB";
         public static final String ODO_PARALLEL_NAME = "LB";
         public static final String ODO_PERP_NAME = "LF";
-        public static final RevHubOrientationOnRobot.LogoFacingDirection IMU_LOGO_DIRECTION =
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
-        public static final RevHubOrientationOnRobot.UsbFacingDirection IMU_USB_DIRECTION =
-                RevHubOrientationOnRobot.UsbFacingDirection.UP;
+        public static final RevHubOrientationOnRobot.LogoFacingDirection IMU_LOGO_DIRECTION
+                = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        public static final RevHubOrientationOnRobot.UsbFacingDirection IMU_USB_DIRECTION
+                = RevHubOrientationOnRobot.UsbFacingDirection.UP;
         public static final boolean DEFAULT_FIELD_CENTRIC = true;
 
         public static final double DRIVER_INPUT_OFFSET_BLUE_DEG = -90.0;
@@ -34,20 +35,24 @@ public final class Constants {
     }
 
     public static final class Shooter {
+
         public static final String LEADER_NAME = "shooterLeader";
         public static final String FOLLOWER_NAME = "shooterFollower";
         public static final String LATCH_NAME = "latch";
-        public static final Motor.GoBILDA GEARING = Motor.GoBILDA.BARE;
+        public static final Motor.GoBILDA GEARING = Motor.GoBILDA.RPM_435;
+        // goBILDA 5203-2402-0014 (13.7:1, 435RPM) 输出轴编码器 ticks/rev 约为 28 * 13.7 = 383.6（官方标注约 384.5）
+        public static final double TICKS_PER_REV_OUTPUT = 384.5;
         public static final boolean LEADER_INVERTED = false;
         public static final boolean FOLLOWER_INVERTED = true;
-        public static final double LATCH_CLOSED_POS = 0.4;
-        public static final double LATCH_OPEN_POS = 0;
+        public static final double LATCH_CLOSED_POS = 0.8;
+        public static final double LATCH_OPEN_POS = 0.2;
 
         private Shooter() {
         }
     }
 
     public static final class Feeder {
+
         public static final String INTAKE_ROLLER_NAME = "intakeRoller";
         public static final String OUTTAKE_ROLLER_NAME = "outtakeRoller";
         public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1150;
@@ -58,4 +63,3 @@ public final class Constants {
         }
     }
 }
-

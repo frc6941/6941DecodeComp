@@ -4,18 +4,17 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
-import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
 public class ShootCommand extends SequentialCommandGroup {
 
     private static final double POWER = 1;
-    private static final long LATCH_LEAD_TIME_MS = 250;
+    private static final long LATCH_LEAD_TIME_MS = 1000;
 
     public ShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder) {
         super(
-                new InstantCommand(() -> shooter.openLatch(), shooter),
+                new InstantCommand(shooter::openLatch, shooter),
                 new InstantCommand(() -> shooter.setOpenLoop(POWER), shooter),
                 new WaitCommand(LATCH_LEAD_TIME_MS),
                 new InstantCommand(() -> {

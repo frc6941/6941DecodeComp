@@ -37,13 +37,21 @@ public class ShooterSubsystem extends SubsystemBase {
         shooterGroup.set(clamp(power, -1.0, 1.0));
     }
 
+    public double getVelocityRpm() {
+        return getFollowerVelocityRpm();
+    }
+
     public void setVelocityRpm(final double rpm) {
         shooterGroup.setRunMode(Motor.RunMode.VelocityControl);
         shooterGroup.set(Math.max(0.0, rpm));
     }
 
-    public double getVelocityRpm() {
-        return shooterGroup.getCorrectedVelocity();
+    public double getLeaderVelocityRpm() {
+        return leader.getCorrectedVelocity() / Constants.Shooter.TICKS_PER_REV_OUTPUT * 60.0;
+    }
+
+    public double getFollowerVelocityRpm() {
+        return follower.getCorrectedVelocity() / Constants.Shooter.TICKS_PER_REV_OUTPUT * 60.0;
     }
 
     public void stop() {
@@ -64,8 +72,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     private Motor buildShooterMotor(final HardwareMap hardwareMap,
-                                   final String name,
-                                   final boolean inverted) {
+                                    final String name,
+                                    final boolean inverted) {
         final Motor motor = new Motor(hardwareMap, name, Constants.Shooter.GEARING);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         motor.setRunMode(Motor.RunMode.RawPower);
