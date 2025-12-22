@@ -42,10 +42,15 @@ public final class Constants {
         public static final Motor.GoBILDA GEARING = Motor.GoBILDA.RPM_435;
         // goBILDA 5203-2402-0014 (13.7:1, 435RPM) 输出轴编码器 ticks/rev 约为 28 * 13.7 = 383.6（官方标注约 384.5）
         public static final double TICKS_PER_REV_OUTPUT = 384.5;
+        /**
+         * 输出轴 -> 飞轮(或最终射出轮) 的额外传动比修正。 现有代码中使用了 "/3.0*2.0"（即
+         * 2/3），这里显式命名避免“魔法数字”。 若你的机构并非 3:2，请把该值改成实际的 (wheelRev / outputRev)。
+         */
+        public static final double OUTPUT_TO_WHEEL_RATIO = 2.0 / 3.0;
         public static final boolean LEADER_INVERTED = false;
         public static final boolean FOLLOWER_INVERTED = true;
-        public static final double LATCH_CLOSED_POS = 0.8;
-        public static final double LATCH_OPEN_POS = 0.2;
+        public static final double LATCH_CLOSED_POS = 0.65;
+        public static final double LATCH_OPEN_POS = 0.4;
 
         private Shooter() {
         }

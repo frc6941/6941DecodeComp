@@ -132,6 +132,7 @@ public class CommandTeleOp extends CommandOpMode {
         telemetry.addData("Driver Alliance", driverAlliance);
         telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
         telemetry.addData("Shooter Rpm", shooter.getVelocityRpm());
+        telemetry.addData("Shooter Pos", shooter.getFollowerPosition());
 //        telemetry.addData("Leader Rpm", shooter.getLeaderVelocityRpm());
 //        telemetry.addData("Follower Rpm", shooter.getFollowerVelocityRpm());
 //        telemetry.addData("Shooter Rps", shooter.getVelocityRps());
