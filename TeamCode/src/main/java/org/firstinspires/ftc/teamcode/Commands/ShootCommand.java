@@ -24,15 +24,17 @@ public class ShootCommand extends SequentialCommandGroup {
                 new RepeatCommand(
                         new SequentialCommandGroup(
                                 new InstantCommand(() -> {
-                                    feeder.setIntakeOpenLoop(POWER);
+
+                                    feeder.setIntakeOpenLoop(0.7);
                                     feeder.setOuttakeOpenLoop(0.5);
                                 }, feeder),
+                                new WaitCommand(5000),
                                 new WaitUntilCommand(shooter::atTargetRpm),
                                 new InstantCommand(() -> {
                                     feeder.setIntakeOpenLoop(POWER);
                                     feeder.setOuttakeOpenLoop(POWER);
                                 }, feeder),
-                                new WaitCommand(125)
+                                new WaitCommand(0)
                         )
                 )
 //                        .andThen(

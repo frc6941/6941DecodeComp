@@ -11,8 +11,8 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
-import org.firstinspires.ftc.teamcode.Commands.ShootCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
@@ -55,6 +55,9 @@ public class CommandTeleOp extends CommandOpMode {
         final Trigger leftBumper = new Trigger(
                 () -> driverRC.getButton(GamepadKeys.Button.LEFT_BUMPER)
         );
+        final Trigger rightBumper = new Trigger(
+                () -> driverRC.getButton(GamepadKeys.Button.RIGHT_BUMPER)
+        );
 
 //        rightTrigger.whileActiveContinuous(
 //                //new ParallelCommandGroup(
@@ -70,7 +73,7 @@ public class CommandTeleOp extends CommandOpMode {
 //                //)
 //        );
         rightTrigger.whileActiveOnce(
-                new ShootCommand(shooter, feeder)
+                new CloseShootCommand(shooter, feeder, rightBumper)
         );
         leftTrigger.whileActiveContinuous(
                 new IntakeCommand(feeder, 0.7, 0.7)
@@ -78,6 +81,7 @@ public class CommandTeleOp extends CommandOpMode {
         leftBumper.whileActiveContinuous(
                 new IntakeCommand(feeder, -0.7, -0.7)
         );
+        //rightBumper.whileActiveOnce(new ShootCommand(shooter,feeder));
 
         register(drive);
         register(shooter);
