@@ -55,12 +55,16 @@ public class ShooterSubsystem extends SubsystemBase {
         setVelocityClosedLoopEnabled(true);
     }
 
+    public double getTargetRpm() {
+        return targetRpm;
+    }
+
     public void setTargetRpm(final double rpm) {
         targetRpm = Math.max(0.0, rpm);
     }
 
-    public double getTargetRpm() {
-        return targetRpm;
+    public boolean isVelocityClosedLoopEnabled() {
+        return velocityClosedLoopEnabled;
     }
 
     public void setVelocityClosedLoopEnabled(final boolean enabled) {
@@ -69,10 +73,6 @@ public class ShooterSubsystem extends SubsystemBase {
         }
         velocityClosedLoopEnabled = enabled;
         velocityController.reset();
-    }
-
-    public boolean isVelocityClosedLoopEnabled() {
-        return velocityClosedLoopEnabled;
     }
 
     public double getLastAppliedPower() {
@@ -84,7 +84,11 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public boolean atTargetRpm() {
-        return Math.abs(getVelocityErrorRpm()) <= ShooterPidTuning.RPM_TOLERANCE;
+        return atTargetRpm(ShooterPidTuning.RPM_TOLERANCE);
+    }
+
+    public boolean atTargetRpm(double toleranceRps) {
+        return Math.abs(getVelocityErrorRpm()) <= toleranceRps;
     }
 
     public double getLeaderVelocityRpm() {
@@ -150,8 +154,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     private Motor buildShooterMotor(final HardwareMap hardwareMap,
-            final String name,
-            final boolean inverted) {
+                                    final String name,
+                                    final boolean inverted) {
         final Motor motor = new Motor(hardwareMap, name, Constants.Shooter.GEARING);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         motor.setRunMode(Motor.RunMode.RawPower);

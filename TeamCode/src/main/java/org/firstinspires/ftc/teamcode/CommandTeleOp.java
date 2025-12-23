@@ -69,7 +69,7 @@ public class CommandTeleOp extends CommandOpMode {
 //                        )
 //                //)
 //        );
-        rightTrigger.whileActiveContinuous(
+        rightTrigger.whileActiveOnce(
                 new ShootCommand(shooter, feeder)
         );
         leftTrigger.whileActiveContinuous(

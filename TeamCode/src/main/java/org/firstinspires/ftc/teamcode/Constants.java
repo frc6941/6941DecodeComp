@@ -46,7 +46,7 @@ public final class Constants {
          * 输出轴 -> 飞轮(或最终射出轮) 的额外传动比修正。 现有代码中使用了 "/3.0*2.0"（即
          * 2/3），这里显式命名避免“魔法数字”。 若你的机构并非 3:2，请把该值改成实际的 (wheelRev / outputRev)。
          */
-        public static final double OUTPUT_TO_WHEEL_RATIO = 2.0 / 3.0;
+        public static final double OUTPUT_TO_WHEEL_RATIO = 1.0 / 1.0;
         public static final boolean LEADER_INVERTED = false;
         public static final boolean FOLLOWER_INVERTED = true;
         public static final double LATCH_CLOSED_POS = 0.65;
