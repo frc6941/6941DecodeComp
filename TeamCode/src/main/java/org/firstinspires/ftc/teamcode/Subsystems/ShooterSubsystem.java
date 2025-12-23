@@ -16,7 +16,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final Motor follower;
     private final MotorGroup shooterGroup;
     private final Servo latch;
-
+    
     private final PIDController velocityController = new PIDController(0.0, 0.0, 0.0);
     private boolean velocityClosedLoopEnabled = false;
     private double targetRpm = 0.0;
@@ -47,7 +47,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public double getVelocityRpm() {
-        return getFollowerVelocityRpm();
+        return getLeaderVelocityRpm();
     }
 
     public void setVelocityRpm(final double rpm) {

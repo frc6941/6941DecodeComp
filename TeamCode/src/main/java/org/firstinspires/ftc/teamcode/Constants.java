@@ -47,8 +47,8 @@ public final class Constants {
          * 2/3），这里显式命名避免“魔法数字”。 若你的机构并非 3:2，请把该值改成实际的 (wheelRev / outputRev)。
          */
         public static final double OUTPUT_TO_WHEEL_RATIO = 1.0 / 1.0;
-        public static final boolean LEADER_INVERTED = false;
-        public static final boolean FOLLOWER_INVERTED = true;
+        public static final boolean LEADER_INVERTED = true;
+        public static final boolean FOLLOWER_INVERTED = false;
         public static final double LATCH_CLOSED_POS = 0.65;
         public static final double LATCH_OPEN_POS = 0.4;
 

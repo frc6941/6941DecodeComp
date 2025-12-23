@@ -32,7 +32,7 @@ public class ShootCommand extends SequentialCommandGroup {
                                     feeder.setIntakeOpenLoop(POWER);
                                     feeder.setOuttakeOpenLoop(POWER);
                                 }, feeder),
-                                new WaitCommand(175)
+                                new WaitCommand(125)
                         )
                 )
 //                        .andThen(
