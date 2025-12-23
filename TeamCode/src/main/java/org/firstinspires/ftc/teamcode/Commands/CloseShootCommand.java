@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RepeatCommand;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
@@ -22,18 +21,19 @@ public class CloseShootCommand extends SequentialCommandGroup {
                 new RepeatCommand(
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(trigger::get),
-                                new RunCommand(() -> {
+                                new InstantCommand(() -> {
                                     shooter.openLatch();
-                                    feeder.setIntakeOpenLoop(0.6);
+                                    feeder.setIntakeOpenLoop(0.8);
                                     feeder.setOuttakeOpenLoop(0.7);
-                                }, feeder),
+                                }),
                                 new WaitUntilCommand(() -> !trigger.get()),
-                                new RunCommand(() -> {
+                                new InstantCommand(() -> {
                                     shooter.closeLatch();
                                     feeder.setIntakeOpenLoop(0);
                                     feeder.setOuttakeOpenLoop(0);
                                 })
-                        ))
+                        )).perpetually()
         );
+        addRequirements(feeder);
     }
 }
