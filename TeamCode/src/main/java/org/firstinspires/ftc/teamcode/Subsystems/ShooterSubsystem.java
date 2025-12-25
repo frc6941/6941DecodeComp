@@ -33,7 +33,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public void setOpenLoop(final double power) {
         lastAppliedPower = clamp(power, -1.0, 1.0);
         leader.set(lastAppliedPower);
-        followLeader();
+
     }
 
     public void followLeader() {
@@ -49,7 +49,7 @@ public class ShooterSubsystem extends SubsystemBase {
         leader.setRunMode(Motor.RunMode.VelocityControl);
         leader.setVelocity(rpm / 60.0 * 2 * Math.PI, AngleUnit.RADIANS);
         targetRpm = rpm;
-        followLeader();
+
     }
 
     public double getTargetRpm() {
@@ -97,11 +97,12 @@ public class ShooterSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         leader.setVeloCoefficients(ShooterPidTuning.kP, ShooterPidTuning.kI, ShooterPidTuning.kD);
+        follower.set(leader.get());
     }
 
     private MotorEx buildShooterMotor(final HardwareMap hardwareMap,
-            final String name,
-            final boolean inverted) {
+                                      final String name,
+                                      final boolean inverted) {
         final MotorEx motor = new MotorEx(hardwareMap, name, Constants.Shooter.GEARING);
         motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         motor.setRunMode(Motor.RunMode.RawPower);
