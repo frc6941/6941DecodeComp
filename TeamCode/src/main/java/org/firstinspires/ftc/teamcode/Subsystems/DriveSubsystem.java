@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -19,7 +18,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     public static final double GYRO_HEADING_OFFSET_DEG = 180;
     // Pinpoint expects offsets in mm: x = sideways (left +), y = forward +
-    private static final double PINPOINT_X_OFFSET_MM = -0.05;
+    private static final double PINPOINT_X_OFFSET_MM = 72;
     private static final double PINPOINT_Y_OFFSET_MM = -180.0;
     private final MecanumDrive drive;
     private final GoBildaPinpointDriver pinpoint;
@@ -99,16 +98,16 @@ public class DriveSubsystem extends SubsystemBase {
         }
     }
 
+    public double getDriverInputOffsetDeg() {
+        return driverInputOffsetDeg;
+    }
+
     /**
      * Set a driver-station perspective offset (degrees) applied to the translation stick
      * before field-centric transform. Typical usage: blue=0°, red=180°.
      */
     public void setDriverInputOffsetDeg(final double offsetDeg) {
         driverInputOffsetDeg = offsetDeg;
-    }
-
-    public double getDriverInputOffsetDeg() {
-        return driverInputOffsetDeg;
     }
 
     public void stop() {

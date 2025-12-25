@@ -24,13 +24,13 @@ public class CloseShootCommand extends SequentialCommandGroup {
                                 new InstantCommand(() -> {
                                     shooter.openLatch();
                                     feeder.setIntakeOpenLoop(0.8);
-                                    feeder.setOuttakeOpenLoop(0.7);
+                                    feeder.setIndexOpenLoop(0.7);
                                 }),
                                 new WaitUntilCommand(() -> !trigger.get()),
                                 new InstantCommand(() -> {
                                     shooter.closeLatch();
                                     feeder.setIntakeOpenLoop(0);
-                                    feeder.setOuttakeOpenLoop(0);
+                                    feeder.setIndexOpenLoop(0);
                                 })
                         )).perpetually()
         );

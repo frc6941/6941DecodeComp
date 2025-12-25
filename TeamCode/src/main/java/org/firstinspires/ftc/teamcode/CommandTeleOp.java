@@ -76,10 +76,10 @@ public class CommandTeleOp extends CommandOpMode {
                 new CloseShootCommand(shooter, feeder, rightBumper)
         );
         leftTrigger.whileActiveContinuous(
-                new IntakeCommand(feeder, 0.7, 0.7)
+                new IntakeCommand(feeder, 0.7)
         );
         leftBumper.whileActiveContinuous(
-                new IntakeCommand(feeder, -0.7, -0.7)
+                new IntakeCommand(feeder, -0.7)
         );
         //rightBumper.whileActiveOnce(new ShootCommand(shooter,feeder));
 

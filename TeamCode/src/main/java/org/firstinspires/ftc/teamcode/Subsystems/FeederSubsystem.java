@@ -10,9 +10,9 @@ import org.firstinspires.ftc.teamcode.Constants;
 public class FeederSubsystem extends SubsystemBase {
 
     private final Motor intakeRoller;
-    private final Motor outtakeRoller;
+    private final Motor indexRoller;
     private final DcMotorEx intakeEx;
-    private final DcMotorEx outtakeEx;
+    private final DcMotorEx indexEx;
 
     public FeederSubsystem(final HardwareMap hardwareMap) {
         intakeRoller = buildRollerMotor(
@@ -20,26 +20,26 @@ public class FeederSubsystem extends SubsystemBase {
                 Constants.Feeder.INTAKE_ROLLER_NAME,
                 Constants.Feeder.INTAKE_INVERTED
         );
-        outtakeRoller = buildRollerMotor(
+        indexRoller = buildRollerMotor(
                 hardwareMap,
-                Constants.Feeder.OUTTAKE_ROLLER_NAME,
-                Constants.Feeder.OUTTAKE_INVERTED
+                Constants.Feeder.INDEX_ROLLER_NAME,
+                Constants.Feeder.INDEX_INVERTED
         );
 
         DcMotorEx tmpIntake;
-        DcMotorEx tmpOuttake;
+        DcMotorEx tmpIndex;
         try {
             tmpIntake = hardwareMap.get(DcMotorEx.class, Constants.Feeder.INTAKE_ROLLER_NAME);
         } catch (Exception ignored) {
             tmpIntake = null;
         }
         try {
-            tmpOuttake = hardwareMap.get(DcMotorEx.class, Constants.Feeder.OUTTAKE_ROLLER_NAME);
+            tmpIndex = hardwareMap.get(DcMotorEx.class, Constants.Feeder.INDEX_ROLLER_NAME);
         } catch (Exception ignored) {
-            tmpOuttake = null;
+            tmpIndex = null;
         }
         intakeEx = tmpIntake;
-        outtakeEx = tmpOuttake;
+        indexEx = tmpIndex;
     }
 
     public void setIntakeOpenLoop(final double power) {
@@ -47,19 +47,9 @@ public class FeederSubsystem extends SubsystemBase {
         intakeRoller.set(clamp(power, -1.0, 1.0));
     }
 
-    public void setOuttakeOpenLoop(final double power) {
-        outtakeRoller.setRunMode(Motor.RunMode.RawPower);
-        outtakeRoller.set(clamp(power, -1.0, 1.0));
-    }
-
-    public void setIntakeVelocityRpm(final double rpm) {
-        intakeRoller.setRunMode(Motor.RunMode.VelocityControl);
-        intakeRoller.set(Math.max(0.0, rpm));
-    }
-
-    public void setOuttakeVelocityRpm(final double rpm) {
-        outtakeRoller.setRunMode(Motor.RunMode.VelocityControl);
-        outtakeRoller.set(Math.max(0.0, rpm));
+    public void setIndexOpenLoop(final double power) {
+        indexRoller.setRunMode(Motor.RunMode.RawPower);
+        indexRoller.set(clamp(power, -1.0, 1.0));
     }
 
     public double getIntakeVelocityRpm() {
@@ -74,23 +64,33 @@ public class FeederSubsystem extends SubsystemBase {
         }
     }
 
-    public double getOuttakeVelocityRpm() {
-        if (outtakeEx != null) {
-            final double ticksPerSec = outtakeEx.getVelocity();
+    public void setIntakeVelocityRpm(final double rpm) {
+        intakeRoller.setRunMode(Motor.RunMode.VelocityControl);
+        intakeRoller.set(Math.max(0.0, rpm));
+    }
+
+    public double getIndexVelocityRpm() {
+        if (indexEx != null) {
+            final double ticksPerSec = indexEx.getVelocity();
             return (ticksPerSec * 60.0) / Constants.Shooter.TICKS_PER_REV_OUTPUT;
         }
         try {
-            return outtakeRoller.getCorrectedVelocity();
+            return indexRoller.getCorrectedVelocity();
         } catch (Exception ignored) {
             return 0.0;
         }
     }
 
+    public void setIndexVelocityRpm(final double rpm) {
+        indexRoller.setRunMode(Motor.RunMode.VelocityControl);
+        indexRoller.set(Math.max(0.0, rpm));
+    }
+
     public void stop() {
         intakeRoller.set(0.0);
-        outtakeRoller.set(0.0);
+        indexRoller.set(0.0);
         intakeRoller.setRunMode(Motor.RunMode.RawPower);
-        outtakeRoller.setRunMode(Motor.RunMode.RawPower);
+        indexRoller.setRunMode(Motor.RunMode.RawPower);
     }
 
     private Motor buildRollerMotor(final HardwareMap hardwareMap,

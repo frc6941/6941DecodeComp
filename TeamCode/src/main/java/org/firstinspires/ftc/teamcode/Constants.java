@@ -39,13 +39,8 @@ public final class Constants {
         public static final String LEADER_NAME = "shooterLeader";
         public static final String FOLLOWER_NAME = "shooterFollower";
         public static final String LATCH_NAME = "latch";
-        public static final Motor.GoBILDA GEARING = Motor.GoBILDA.RPM_435;
-        // goBILDA 5203-2402-0014 (13.7:1, 435RPM) 输出轴编码器 ticks/rev 约为 28 * 13.7 = 383.6（官方标注约 384.5）
-        public static final double TICKS_PER_REV_OUTPUT = 384.5;
-        /**
-         * 输出轴 -> 飞轮(或最终射出轮) 的额外传动比修正。 现有代码中使用了 "/3.0*2.0"（即
-         * 2/3），这里显式命名避免“魔法数字”。 若你的机构并非 3:2，请把该值改成实际的 (wheelRev / outputRev)。
-         */
+        public static final Motor.GoBILDA GEARING = Motor.GoBILDA.BARE;
+        public static final double TICKS_PER_REV_OUTPUT = 28.0;
         public static final double OUTPUT_TO_WHEEL_RATIO = 1.0 / 1.0;
         public static final boolean LEADER_INVERTED = true;
         public static final boolean FOLLOWER_INVERTED = false;
@@ -59,10 +54,10 @@ public final class Constants {
     public static final class Feeder {
 
         public static final String INTAKE_ROLLER_NAME = "intakeRoller";
-        public static final String OUTTAKE_ROLLER_NAME = "outtakeRoller";
+        public static final String INDEX_ROLLER_NAME = "indexRoller";
         public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1150;
         public static final boolean INTAKE_INVERTED = true;
-        public static final boolean OUTTAKE_INVERTED = true;
+        public static final boolean INDEX_INVERTED = true;
 
         private Feeder() {
         }
