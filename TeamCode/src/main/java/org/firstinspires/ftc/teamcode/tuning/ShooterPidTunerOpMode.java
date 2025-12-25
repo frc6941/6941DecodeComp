@@ -46,14 +46,12 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
         packet.put("shooter/actualRpm", shooter.getVelocityRpm());
         packet.put("shooter/errorRpm", shooter.getVelocityErrorRpm());
         packet.put("shooter/power", shooter.getLastAppliedPower());
-        packet.put("shooter/closedLoop", shooter.isVelocityClosedLoopEnabled());
         dashboard.sendTelemetryPacket(packet);
 
         telemetry.addData("Target RPM", shooter.getTargetRpm());
         telemetry.addData("Actual RPM", shooter.getVelocityRpm());
         telemetry.addData("Error RPM", shooter.getVelocityErrorRpm());
         telemetry.addData("Power", shooter.getLastAppliedPower());
-        telemetry.addData("ClosedLoop", shooter.isVelocityClosedLoopEnabled());
         telemetry.addData("AtTarget", shooter.atTargetRpm());
         telemetry.update();
     }
