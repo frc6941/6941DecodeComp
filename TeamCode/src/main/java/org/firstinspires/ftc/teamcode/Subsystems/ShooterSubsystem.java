@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.tuning.ShooterPidTuning;
@@ -15,8 +14,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final Motor leader;
     private final Motor follower;
     private final MotorGroup shooterGroup;
-    private final Servo latch;
-    
+
     private final PIDController velocityController = new PIDController(0.0, 0.0, 0.0);
     private boolean velocityClosedLoopEnabled = false;
     private double targetRpm = 0.0;
@@ -34,9 +32,6 @@ public class ShooterSubsystem extends SubsystemBase {
                 Constants.Shooter.FOLLOWER_INVERTED
         );
         shooterGroup = new MotorGroup(leader, follower);
-
-        latch = hardwareMap.get(Servo.class, Constants.Shooter.LATCH_NAME);
-        latch.setPosition(Constants.Shooter.LATCH_CLOSED_POS);
     }
 
     public void setOpenLoop(final double power) {
@@ -116,17 +111,6 @@ public class ShooterSubsystem extends SubsystemBase {
         shooterGroup.setRunMode(Motor.RunMode.RawPower);
     }
 
-    public void openLatch() {
-        setLatchPosition(Constants.Shooter.LATCH_OPEN_POS);
-    }
-
-    public void closeLatch() {
-        setLatchPosition(Constants.Shooter.LATCH_CLOSED_POS);
-    }
-
-    public void setLatchPosition(final double position) {
-        latch.setPosition(clamp(position, 0.0, 1.0));
-    }
 
     @Override
     public void periodic() {

@@ -17,7 +17,6 @@ public class ShootCommand extends SequentialCommandGroup {
     public ShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder) {
         super(
                 new InstantCommand(() -> {
-                    shooter.openLatch();
                     shooter.setVelocityClosedLoopEnabled(true);
                     shooter.setTargetRpm(ShooterPidTuning.TARGET_RPM);
                 }, shooter),

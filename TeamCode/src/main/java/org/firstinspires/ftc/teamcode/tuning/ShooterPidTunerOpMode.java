@@ -27,7 +27,6 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
         shooter = new ShooterSubsystem(hardwareMap);
         register(shooter);
 
-        shooter.closeLatch();
         telemetry.addLine("Use Dashboard Config: ShooterPidTuning");
         telemetry.update();
     }
@@ -38,7 +37,6 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
 
         if (ShooterPidTuning.ENABLED) {
             shooter.setVelocityRpm(ShooterPidTuning.TARGET_RPM);
-            shooter.closeLatch();
         } else {
             shooter.stop();
         }
