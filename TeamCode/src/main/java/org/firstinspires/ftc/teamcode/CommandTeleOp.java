@@ -12,7 +12,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
+import org.firstinspires.ftc.teamcode.Commands.IndexCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
+import org.firstinspires.ftc.teamcode.Commands.PreShootCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
@@ -59,27 +61,14 @@ public class CommandTeleOp extends CommandOpMode {
                 () -> driverRC.getButton(GamepadKeys.Button.RIGHT_BUMPER)
         );
 
-//        rightTrigger.whileActiveContinuous(
-//                //new ParallelCommandGroup(
-//                //        new PreShootCommand(shooter),
-//                        new LockHeadingCommand(
-//                                drive,
-//                                () -> -driverRC.getLeftX(),
-//                                () -> driverRC.getLeftY(),
-//                                () -> 45 + 90,
-//                                2.0,
-//                                telemetry
-//                        )
-//                //)
-//        );
         rightTrigger.whileActiveOnce(
                 new CloseShootCommand(shooter, feeder, rightBumper)
         );
         leftTrigger.whileActiveContinuous(
-                new IntakeCommand(feeder, 0.7)
+                new IntakeCommand(feeder)
         );
         leftBumper.whileActiveContinuous(
-                new IntakeCommand(feeder, -0.7)
+                new IndexCommand(feeder, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
         );
         //rightBumper.whileActiveOnce(new ShootCommand(shooter,feeder));
 
@@ -97,13 +86,7 @@ public class CommandTeleOp extends CommandOpMode {
                 )
         );
         shooter.setDefaultCommand(
-                new RunCommand(
-                        () -> {
-                            shooter.setOpenLoop(0.6);
-                            shooter.closeLatch();
-                        },
-                        shooter
-                )
+                new PreShootCommand(shooter)
         );
         feeder.setDefaultCommand(
                 new RunCommand(

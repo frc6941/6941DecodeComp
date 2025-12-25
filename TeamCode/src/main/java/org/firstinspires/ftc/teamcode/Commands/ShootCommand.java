@@ -36,12 +36,6 @@ public class ShootCommand extends SequentialCommandGroup {
                                 new WaitCommand(0)
                         )
                 )
-//                        .andThen(
-//                        new InstantCommand(() -> {
-//                            feeder.setIntakeOpenLoop(0);
-//                            feeder.setIndexOpenLoop(0);
-//                        }, feeder)
-//                )
         );
     }
 }

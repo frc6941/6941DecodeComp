@@ -2,18 +2,16 @@ package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
+import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 
 public class IntakeCommand extends CommandBase {
-
-    private static final double DEFAULT_INTAKE_POWER = 1;
-    private static final double DEFAULT_INDEX_POWER = 0.7;
 
     private final FeederSubsystem feeder;
     private double intakePower, indexPower;
 
     public IntakeCommand(final FeederSubsystem feeder) {
-        this(feeder, DEFAULT_INTAKE_POWER);
+        this(feeder, Constants.Feeder.DEFAULT_INTAKE_POWER);
     }
 
     public IntakeCommand(final FeederSubsystem feeder, final double intakePower) {

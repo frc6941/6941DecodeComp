@@ -46,6 +46,7 @@ public final class Constants {
         public static final boolean FOLLOWER_INVERTED = false;
         public static final double LATCH_CLOSED_POS = 0.65;
         public static final double LATCH_OPEN_POS = 0.4;
+        public static final double DEFAULT_POWER = 0.6;
 
         private Shooter() {
         }
@@ -58,6 +59,8 @@ public final class Constants {
         public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1150;
         public static final boolean INTAKE_INVERTED = true;
         public static final boolean INDEX_INVERTED = true;
+        public static final double DEFAULT_INTAKE_POWER = 1;
+        public static final double DEFAULT_INDEX_POWER = 1;
 
         private Feeder() {
         }
