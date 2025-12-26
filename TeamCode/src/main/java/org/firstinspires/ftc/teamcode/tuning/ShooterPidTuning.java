@@ -17,12 +17,12 @@ public final class ShooterPidTuning {
     /**
      * 目标飞轮速度（RPM）。
      */
-    public static double TARGET_RPM = 220.0;
+    public static double TARGET_RPM = 2000.0;
 
     /**
      * PID: 输出为 [-1..1] 的功率修正量，输入为 RPM。
      */
-    public static double kP = 0.5;
+    public static double kP = 10.0;
     public static double kI = 0.0;
     public static double kD = 0.0;
 

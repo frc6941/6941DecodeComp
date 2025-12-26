@@ -9,9 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
 /**
- * Shooter PID 调参专用 OpMode：
- * - 在 Dashboard 的 Config 里修改 {@link ShooterPidTuning} 的参数（目标RPM + PID/FF）。
- * - 在 Dashboard 图表里查看 targetRpm / actualRpm / power 的时间曲线。
+ * Shooter PID 调参专用 OpMode： - 在 Dashboard 的 Config 里修改 {@link ShooterPidTuning}
+ * 的参数（目标RPM + PID/FF）。 - 在 Dashboard 图表里查看 targetRpm / actualRpm / power 的时间曲线。
  */
 @TeleOp(name = "Tuning: Shooter PID (Dashboard)", group = "Tuning")
 public class ShooterPidTunerOpMode extends CommandOpMode {
@@ -44,18 +43,14 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
         final TelemetryPacket packet = new TelemetryPacket();
         packet.put("shooter/targetRpm", shooter.getTargetRpm());
         packet.put("shooter/actualRpm", shooter.getVelocityRpm());
-        packet.put("shooter/errorRpm", shooter.getVelocityErrorRpm());
         packet.put("shooter/power", shooter.getLastAppliedPower());
         dashboard.sendTelemetryPacket(packet);
 
         telemetry.addData("Target RPM", shooter.getTargetRpm());
         telemetry.addData("Actual RPM", shooter.getVelocityRpm());
-        telemetry.addData("Error RPM", shooter.getVelocityErrorRpm());
         telemetry.addData("Power", shooter.getLastAppliedPower());
         telemetry.addData("AtTarget", shooter.atTargetRpm());
+        telemetry.addData("kP", shooter.getPID()[0]);
         telemetry.update();
     }
 }
-
-
-

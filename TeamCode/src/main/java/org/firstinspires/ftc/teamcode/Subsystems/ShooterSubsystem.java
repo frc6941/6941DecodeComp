@@ -5,7 +5,6 @@ import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.tuning.ShooterPidTuning;
 
@@ -32,13 +31,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public void setOpenLoop(final double power) {
         lastAppliedPower = clamp(power, -1.0, 1.0);
+        leader.setRunMode(Motor.RunMode.RawPower);
         leader.set(lastAppliedPower);
-
-    }
-
-    public void followLeader() {
-        follower.setRunMode(Motor.RunMode.RawPower);
-        follower.set(leader.get());
     }
 
     public double getVelocityRpm() {
@@ -47,9 +41,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public void setVelocityRpm(final double rpm) {
         leader.setRunMode(Motor.RunMode.VelocityControl);
-        leader.setVelocity(rpm / 60.0 * 2 * Math.PI, AngleUnit.RADIANS);
+        leader.setVelocity(rpm / 60.0 * Constants.Shooter.TICKS_PER_REV_OUTPUT);
+        leader.set(0.5);
         targetRpm = rpm;
-
     }
 
     public double getTargetRpm() {
@@ -60,16 +54,12 @@ public class ShooterSubsystem extends SubsystemBase {
         return lastAppliedPower;
     }
 
-    public double getVelocityErrorRpm() {
-        return targetRpm - getVelocityRpm();
-    }
-
     public boolean atTargetRpm() {
         return atTargetRpm(ShooterPidTuning.RPM_TOLERANCE);
     }
 
     public boolean atTargetRpm(double toleranceRps) {
-        return Math.abs(getVelocityErrorRpm()) <= toleranceRps;
+        return Math.abs(targetRpm - getVelocityRpm()) <= toleranceRps;
     }
 
     public double getLeaderVelocityRpm() {
@@ -96,8 +86,16 @@ public class ShooterSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        leader.setVeloCoefficients(ShooterPidTuning.kP, ShooterPidTuning.kI, ShooterPidTuning.kD);
+        setPID(ShooterPidTuning.kP, ShooterPidTuning.kI, ShooterPidTuning.kD);
         follower.set(leader.get());
+    }
+
+    public void setPID(double kP, double kI, double kD) {
+        leader.setVeloCoefficients(kP, kI, kD);
+    }
+
+    public double[] getPID() {
+        return leader.getVeloCoefficients();
     }
 
     private MotorEx buildShooterMotor(final HardwareMap hardwareMap,
