@@ -11,7 +11,7 @@ public class IndexCommand extends CommandBase {
     private double intakePower, indexPower;
 
     public IndexCommand(final FeederSubsystem feeder) {
-        this(feeder, Constants.Feeder.DEFAULT_INTAKE_POWER, Constants.Feeder.DEFAULT_INTAKE_POWER);
+        this(feeder, Constants.Feeder.DEFAULT_INTAKE_POWER, Constants.Feeder.DEFAULT_INDEX_POWER);
     }
 
     public IndexCommand(final FeederSubsystem feeder, final double intakePower, final double indexPower) {

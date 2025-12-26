@@ -23,7 +23,7 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
         dashboard = FtcDashboard.getInstance();
         telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
 
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystem(hardwareMap, telemetry);
         register(shooter);
 
         telemetry.addLine("Use Dashboard Config: ShooterPidTuning");
@@ -36,6 +36,7 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
 
         if (ShooterPidTuning.ENABLED) {
             shooter.setVelocityRpm(ShooterPidTuning.TARGET_RPM);
+            //shooter.setOpenLoop(1.0);
         } else {
             shooter.stop();
         }
@@ -50,7 +51,9 @@ public class ShooterPidTunerOpMode extends CommandOpMode {
         telemetry.addData("Actual RPM", shooter.getVelocityRpm());
         telemetry.addData("Power", shooter.getLastAppliedPower());
         telemetry.addData("AtTarget", shooter.atTargetRpm());
-        telemetry.addData("kP", shooter.getPID()[0]);
+        telemetry.addData("kP", shooter.getPIDF().p);
+        telemetry.addData("Follower RPM", shooter.getFollowerVelocityRpm());
+        telemetry.addData("Leader RPM", shooter.getLeaderVelocityRpm());
         telemetry.update();
     }
 }

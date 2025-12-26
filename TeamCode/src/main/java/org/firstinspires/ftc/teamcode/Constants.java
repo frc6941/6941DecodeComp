@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
@@ -59,10 +60,16 @@ public final class Constants {
         public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1150;
         public static final boolean INTAKE_INVERTED = true;
         public static final boolean INDEX_INVERTED = true;
-        public static final double DEFAULT_INTAKE_POWER = 1;
-        public static final double DEFAULT_INDEX_POWER = 1;
+        public static final double DEFAULT_INTAKE_POWER = 0.7;
+        public static final double DEFAULT_INDEX_POWER = 0.8;
 
         private Feeder() {
         }
+    }
+
+    public final static class Field {
+
+        public static final Pose2d GOAL_BLUE = new Pose2d(-70, -70, 0);
+        public static final Pose2d GOAL_RED = new Pose2d(-70, +70, 0);
     }
 }

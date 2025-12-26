@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.IndexCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
+import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Commands.PreShootCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
@@ -34,7 +35,7 @@ public class CommandTeleOp extends CommandOpMode {
     public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new DriveSubsystem(hardwareMap, telemetry);
-        shooter = new ShooterSubsystem(hardwareMap);
+        shooter = new ShooterSubsystem(hardwareMap, telemetry);
         feeder = new FeederSubsystem(hardwareMap);
         driverRC = new GamepadEx(gamepad1);
         limelight = new LimelightSubsystem(hardwareMap);
@@ -60,6 +61,9 @@ public class CommandTeleOp extends CommandOpMode {
         final Trigger rightBumper = new Trigger(
                 () -> driverRC.getButton(GamepadKeys.Button.RIGHT_BUMPER)
         );
+        final Trigger buttonA = new Trigger(
+                () -> driverRC.getButton(GamepadKeys.Button.A)
+        );
 
         rightTrigger.whileActiveOnce(
                 new CloseShootCommand(shooter, feeder, rightBumper)
@@ -70,8 +74,26 @@ public class CommandTeleOp extends CommandOpMode {
         leftBumper.whileActiveContinuous(
                 new IndexCommand(feeder, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
         );
-        //rightBumper.whileActiveOnce(new ShootCommand(shooter,feeder));
 
+        rightTrigger.whileActiveContinuous(
+                new LockHeadingCommand(
+                        drive,
+                        driverRC::getLeftX,
+                        driverRC::getLeftY,
+                        () -> {
+                            final Pose2d goal = driverAlliance == DriverAlliance.BLUE
+                                    ? Constants.Field.GOAL_BLUE
+                                    : Constants.Field.GOAL_RED;
+                            final Pose2d pose = drive.getPose();
+
+                            final double dx = goal.getX() - pose.getX();
+                            final double dy = goal.getY() - pose.getY();
+                            return Math.toDegrees(Math.atan2(dy, dx));
+                        },
+                        2.0,
+                        telemetry
+                )
+        );
         register(drive);
         register(shooter);
         register(feeder);
@@ -119,7 +141,6 @@ public class CommandTeleOp extends CommandOpMode {
         telemetry.addData("Driver Alliance", driverAlliance);
         telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
         telemetry.addData("Shooter Rpm", shooter.getVelocityRpm());
-        telemetry.addData("Shooter Pos", shooter.getFollowerPosition());
 //        telemetry.addData("Leader Rpm", shooter.getLeaderVelocityRpm());
 //        telemetry.addData("Follower Rpm", shooter.getFollowerVelocityRpm());
 //        telemetry.addData("Shooter Rps", shooter.getVelocityRps());
