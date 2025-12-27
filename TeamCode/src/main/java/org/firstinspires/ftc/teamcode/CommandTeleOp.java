@@ -14,7 +14,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.IndexCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
-import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Commands.PreShootCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
@@ -83,25 +82,25 @@ public class CommandTeleOp extends CommandOpMode {
                 new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
         );
 
-        rightTrigger.whileActiveContinuous(
-                new LockHeadingCommand(
-                        drive,
-                        driverRC::getLeftX,
-                        driverRC::getLeftY,
-                        () -> {
-                            final Pose2d goal = driverAlliance == DriverAlliance.BLUE
-                                    ? Constants.Field.GOAL_BLUE
-                                    : Constants.Field.GOAL_RED;
-                            final Pose2d pose = drive.getPose();
-
-                            final double dx = goal.getX() - pose.getX();
-                            final double dy = goal.getY() - pose.getY();
-                            return Math.toDegrees(Math.atan2(dy, dx));
-                        },
-                        2.0,
-                        telemetry
-                )
-        );
+//        rightTrigger.whileActiveContinuous(
+//                new LockHeadingCommand(
+//                        drive,
+//                        driverRC::getLeftX,
+//                        driverRC::getLeftY,
+//                        () -> {
+//                            final Pose2d goal = driverAlliance == DriverAlliance.BLUE
+//                                    ? Constants.Field.GOAL_BLUE
+//                                    : Constants.Field.GOAL_RED;
+//                            final Pose2d pose = drive.getPose();
+//
+//                            final double dx = goal.getX() - pose.getX();
+//                            final double dy = goal.getY() - pose.getY();
+//                            return Math.toDegrees(Math.atan2(dy, dx));
+//                        },
+//                        2.0,
+//                        telemetry
+//                )
+//        );
         register(drive);
         register(shooter);
         register(feeder);

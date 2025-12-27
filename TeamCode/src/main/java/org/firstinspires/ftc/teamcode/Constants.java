@@ -107,7 +107,9 @@ public final class Constants {
         public static final boolean INTAKE_INVERTED = true;
         public static final boolean INDEX_INVERTED = true;
         public static final double DEFAULT_INTAKE_POWER = 0.7;
-        public static final double DEFAULT_INDEX_POWER = 0.8;
+
+        public static final double SHOOT_INTAKE_POWER = 1.0;
+        public static final double DEFAULT_INDEX_POWER = 1.0;//0.8
 
         private Feeder() {
         }
