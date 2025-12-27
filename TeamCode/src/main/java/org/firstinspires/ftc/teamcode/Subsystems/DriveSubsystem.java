@@ -13,7 +13,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Constants;
 
-
 public class DriveSubsystem extends SubsystemBase {
 
     public static final double GYRO_HEADING_OFFSET_DEG = 180;
@@ -21,7 +20,7 @@ public class DriveSubsystem extends SubsystemBase {
     private static final double PINPOINT_X_OFFSET_MM = 72;
     private static final double PINPOINT_Y_OFFSET_MM = -180.0;
     private final MecanumDrive drive;
-    private final GoBildaPinpointDriver pinpoint;
+    private GoBildaPinpointDriver pinpoint;
     private final Telemetry telemetry;
     private Pose2d rawPose = new Pose2d(0, 0, 0);
     private Pose2d previousRawPose = new Pose2d(0, 0, 0);
@@ -38,14 +37,22 @@ public class DriveSubsystem extends SubsystemBase {
 
         drive = new MecanumDrive(frontLeft, frontRight, backLeft, backRight);
 
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "PinPoint");
-        pinpoint.setOffsets(PINPOINT_X_OFFSET_MM, PINPOINT_Y_OFFSET_MM, DistanceUnit.MM);
-        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        pinpoint.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.REVERSED,
-                GoBildaPinpointDriver.EncoderDirection.FORWARD
-        );
-        pinpoint.resetPosAndIMU();
+        // 可选：如果没装/没配置 PinPoint，就跳过（避免直接崩溃）
+        try {
+            pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "PinPoint");
+            pinpoint.setOffsets(PINPOINT_X_OFFSET_MM, PINPOINT_Y_OFFSET_MM, DistanceUnit.MM);
+            pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+            pinpoint.setEncoderDirections(
+                    GoBildaPinpointDriver.EncoderDirection.REVERSED,
+                    GoBildaPinpointDriver.EncoderDirection.FORWARD
+            );
+            pinpoint.resetPosAndIMU();
+        } catch (Exception e) {
+            pinpoint = null;
+            if (telemetry != null) {
+                telemetry.addData("PinPoint", "NOT FOUND - odometry disabled");
+            }
+        }
     }
 
     private Motor buildDriveMotor(final HardwareMap hardwareMap, final String name) {
@@ -56,6 +63,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (pinpoint == null) {
+            return;
+        }
         pinpoint.update();
         final Pose2D p = pinpoint.getPosition();
         previousRawPose = rawPose;
@@ -103,8 +113,9 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     /**
-     * Set a driver-station perspective offset (degrees) applied to the translation stick
-     * before field-centric transform. Typical usage: blue=0°, red=180°.
+     * Set a driver-station perspective offset (degrees) applied to the
+     * translation stick before field-centric transform. Typical usage: blue=0°,
+     * red=180°.
      */
     public void setDriverInputOffsetDeg(final double offsetDeg) {
         driverInputOffsetDeg = offsetDeg;
@@ -146,7 +157,17 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     public void resetHeading() {
-        pinpoint.resetPosAndIMU();
+        if (pinpoint != null) {
+            pinpoint.resetPosAndIMU();
+        } else {
+            zeroPoseEstimate();
+        }
+    }
+
+    private void zeroPoseEstimate() {
+        rawPose = new Pose2d(0, 0, 0);
+        previousRawPose = new Pose2d(0, 0, 0);
+        poseOffset = new Pose2d(0, 0, 0);
     }
 
     private double computeVisionGain(final double distanceMeters) {
