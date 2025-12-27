@@ -5,18 +5,19 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 
-public class IntakeCommand extends CommandBase {
+public class IndexCommand extends CommandBase {
 
     private final FeederSubsystem feeder;
     private double intakePower, indexPower;
 
-    public IntakeCommand(final FeederSubsystem feeder) {
-        this(feeder, Constants.Feeder.DEFAULT_INTAKE_POWER);
+    public IndexCommand(final FeederSubsystem feeder) {
+        this(feeder, Constants.Feeder.DEFAULT_INTAKE_POWER, Constants.Feeder.DEFAULT_INDEX_POWER);
     }
 
-    public IntakeCommand(final FeederSubsystem feeder, final double intakePower) {
+    public IndexCommand(final FeederSubsystem feeder, final double intakePower, final double indexPower) {
         this.feeder = feeder;
         this.intakePower = intakePower;
+        this.indexPower = indexPower;
         addRequirements(feeder);
     }
 
@@ -24,7 +25,6 @@ public class IntakeCommand extends CommandBase {
     public void initialize() {
         feeder.setIntakeOpenLoop(intakePower);
         feeder.setIndexOpenLoop(indexPower);
-
     }
 
     @Override

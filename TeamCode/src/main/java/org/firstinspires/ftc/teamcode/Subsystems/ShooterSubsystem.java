@@ -1,80 +1,122 @@
 package org.firstinspires.ftc.teamcode.Subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorGroup;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.tuning.ShooterPidTuning;
 
 public class ShooterSubsystem extends SubsystemBase {
 
-    private final Motor leader;
-    private final Motor follower;
-    private final MotorGroup shooterGroup;
-    private final Servo latch;
+    private final DcMotorEx leader;
+    private final DcMotorEx follower;
+    ElapsedTime timer = new ElapsedTime();
+    private Telemetry telemetry;
+    private boolean atTargetRpm = false;
+    private boolean wasWithinTolerance = false;
+
+    private double targetRpm = 0.0;
+    private double lastAppliedPower = 0.0;
+
+    public ShooterSubsystem(final HardwareMap hardwareMap, final Telemetry telemetry) {
+        this(hardwareMap);
+        this.telemetry = telemetry;
+    }
 
     public ShooterSubsystem(final HardwareMap hardwareMap) {
-        leader = buildShooterMotor(
-                hardwareMap,
-                Constants.Shooter.LEADER_NAME,
-                Constants.Shooter.LEADER_INVERTED
-        );
-        follower = buildShooterMotor(
-                hardwareMap,
-                Constants.Shooter.FOLLOWER_NAME,
-                Constants.Shooter.FOLLOWER_INVERTED
-        );
-        shooterGroup = new MotorGroup(leader, follower);
-
-        latch = hardwareMap.get(Servo.class, Constants.Shooter.LATCH_NAME);
-        latch.setPosition(Constants.Shooter.LATCH_CLOSED_POS);
+        telemetry = null;
+        leader = hardwareMap.get(DcMotorEx.class, Constants.Shooter.LEADER_NAME);
+        leader.setDirection(Constants.Shooter.LEADER_INVERTED ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
+        follower = hardwareMap.get(DcMotorEx.class, Constants.Shooter.FOLLOWER_NAME);
+        follower.setDirection(Constants.Shooter.FOLLOWER_INVERTED ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
+        leader.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        follower.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
     public void setOpenLoop(final double power) {
-        shooterGroup.setRunMode(Motor.RunMode.RawPower);
-        shooterGroup.set(clamp(power, -1.0, 1.0));
-    }
-
-    public void setVelocityRpm(final double rpm) {
-        shooterGroup.setRunMode(Motor.RunMode.VelocityControl);
-        shooterGroup.set(Math.max(0.0, rpm));
+        lastAppliedPower = clamp(power, -1.0, 1.0);
+        leader.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        leader.setPower(lastAppliedPower);
+        follower.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        follower.setPower(lastAppliedPower);
     }
 
     public double getVelocityRpm() {
-        return shooterGroup.getCorrectedVelocity();
+        return getLeaderVelocityRpm();
+    }
+
+    public void setVelocityRpm(final double rpm) {
+        leader.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        leader.setVelocity(rpm / 60.0 * Constants.Shooter.TICKS_PER_REV_OUTPUT);
+        follower.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        follower.setVelocity(rpm / 60.0 * Constants.Shooter.TICKS_PER_REV_OUTPUT);
+        targetRpm = rpm;
+    }
+
+    public double getTargetRpm() {
+        return targetRpm;
+    }
+
+    public double getLastAppliedPower() {
+        return lastAppliedPower;
+    }
+
+    public boolean atTargetRpm() {
+        return atTargetRpm;
+    }
+
+    public double getLeaderVelocityRpm() {
+        return leader.getVelocity()
+                / Constants.Shooter.TICKS_PER_REV_OUTPUT
+                * 60.0
+                * Constants.Shooter.OUTPUT_TO_WHEEL_RATIO;
+    }
+
+    public double getFollowerVelocityRpm() {
+        return follower.getVelocity()
+                / Constants.Shooter.TICKS_PER_REV_OUTPUT
+                * 60.0
+                * Constants.Shooter.OUTPUT_TO_WHEEL_RATIO;
     }
 
     public void stop() {
-        shooterGroup.set(0.0);
-        shooterGroup.setRunMode(Motor.RunMode.RawPower);
+        setOpenLoop(0.0);
     }
 
-    public void openLatch() {
-        setLatchPosition(Constants.Shooter.LATCH_OPEN_POS);
+    @Override
+    public void periodic() {
+        if (telemetry != null) {
+            telemetry.addData("heartBeat", leader.getPower());
+        }
+        setPIDF(ShooterPidTuning.kP, ShooterPidTuning.kI, ShooterPidTuning.kD, ShooterPidTuning.kF);
+        boolean withinTolerance = targetRpm > 0.0 && Math.abs(targetRpm - getVelocityRpm()) <= ShooterPidTuning.RPM_TOLERANCE;
+        if (withinTolerance) {
+            if (!wasWithinTolerance) {
+                timer.reset();
+            }
+            atTargetRpm = timer.seconds() >= 1;
+        } else {
+            atTargetRpm = false;
+            timer.reset();
+        }
+        wasWithinTolerance = withinTolerance;
     }
 
-    public void closeLatch() {
-        setLatchPosition(Constants.Shooter.LATCH_CLOSED_POS);
+    public void setPIDF(double kP, double kI, double kD, double kF) {
+        leader.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
+        follower.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(kP, kI, kD, kF));
     }
 
-    public void setLatchPosition(final double position) {
-        latch.setPosition(clamp(position, 0.0, 1.0));
-    }
-
-    private Motor buildShooterMotor(final HardwareMap hardwareMap,
-                                   final String name,
-                                   final boolean inverted) {
-        final Motor motor = new Motor(hardwareMap, name, Constants.Shooter.GEARING);
-        motor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
-        motor.setRunMode(Motor.RunMode.RawPower);
-        motor.setInverted(inverted);
-        return motor;
+    public PIDFCoefficients getPIDF() {
+        return leader.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
     private double clamp(final double value, final double min, final double max) {
         return Math.max(min, Math.min(max, value));
     }
 }
-
