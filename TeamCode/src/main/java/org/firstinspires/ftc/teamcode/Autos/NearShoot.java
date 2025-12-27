@@ -4,15 +4,14 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Commands.DriveForTimeCommand;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 
-@Autonomous(name = "Auto Drive For Time", group = "Competition")
-public class DriveForTimeAuto extends CommandOpMode {
+@Autonomous(name = "Near Shoot", group = "Competition")
+public class NearShoot extends CommandOpMode {
 
     private DriveSubsystem drive;
 
@@ -35,13 +34,20 @@ public class DriveForTimeAuto extends CommandOpMode {
         telemetry.update();
 
         schedule(new SequentialCommandGroup(
-                new WaitCommand(35000),
                 new DriveForTimeCommand(
                         drive,
-                        Constants.Auto.DRIVE_LEFT_X,
-                        Constants.Auto.DRIVE_LEFT_Y,
-                        Constants.Auto.DRIVE_RIGHT_X,
-                        Constants.Auto.DRIVE_SECONDS
+                        Constants.NearShootAuto.DRIVE_LEFT_X,
+                        Constants.NearShootAuto.DRIVE_LEFT_Y,
+                        Constants.NearShootAuto.DRIVE_RIGHT_X,
+                        Constants.NearShootAuto.DRIVE_SECONDS
+                ),
+
+                new DriveForTimeCommand(
+                        drive,
+                        Constants.NearShootAuto.DRIVE_LEFT_X,
+                        Constants.NearShootAuto.DRIVE_LEFT_Y,
+                        Constants.NearShootAuto.DRIVE_RIGHT_X,
+                        Constants.NearShootAuto.DRIVE_SECONDS
                 )
         ));
     }
