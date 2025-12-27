@@ -11,13 +11,15 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
+import java.util.function.DoubleSupplier;
+
 public class CloseShootCommand extends SequentialCommandGroup {
 
-    public CloseShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder, Trigger trigger) {
+    public CloseShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder, Trigger trigger, DoubleSupplier targetRpm) {
         super(
                 new InstantCommand(() ->
                 {
-                    shooter.setVelocityRpm(2500);
+                    shooter.setVelocityRpm(targetRpm.getAsDouble());
                     feeder.setIntakeOpenLoop(Constants.Feeder.SHOOT_INTAKE_POWER);
                 }),
                 new RepeatCommand(

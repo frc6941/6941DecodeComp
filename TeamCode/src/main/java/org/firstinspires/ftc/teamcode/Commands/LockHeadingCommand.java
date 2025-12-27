@@ -2,9 +2,10 @@ package org.firstinspires.ftc.teamcode.Commands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.controller.PIDController;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.tuning.LockHeadingTuning;
 
 import java.util.function.DoubleSupplier;
 
@@ -32,9 +33,9 @@ public class LockHeadingCommand extends CommandBase {
         this.toleranceDeg = toleranceDeg;
         this.telemetry = telemetry;
         headingController = new PIDController(
-                Constants.Drive.TURN_kP,
-                Constants.Drive.TURN_kI,
-                Constants.Drive.TURN_kD
+                LockHeadingTuning.TURN_kP,
+                LockHeadingTuning.TURN_kI,
+                LockHeadingTuning.TURN_kD
         );
         headingController.setTolerance(toleranceDeg);
         addRequirements(drive);
@@ -48,10 +49,17 @@ public class LockHeadingCommand extends CommandBase {
 
     @Override
     public void execute() {
+        // Dashboard 调参：每次循环都刷新 PID 系数（参考 GoToPoseCommand）
+        headingController.setPID(
+                LockHeadingTuning.TURN_kP,
+                LockHeadingTuning.TURN_kI,
+                LockHeadingTuning.TURN_kD
+        );
         targetHeadingDeg = targetHeadingSupplier.getAsDouble();
         double currentHeading = drive.getHeadingDegrees();
-        double error = shortestDelta360(currentHeading,targetHeadingDeg);
-        double rotation = headingController.calculate(error);
+        double error = shortestDelta360(targetHeadingDeg, currentHeading);
+        double rotation = headingController.calculate(-error);
+        rotation = clamp(rotation, -Math.abs(LockHeadingTuning.TURN_MAX_OUTPUT), Math.abs(LockHeadingTuning.TURN_MAX_OUTPUT));
         drive.drive(strafeX.getAsDouble(), strafeY.getAsDouble(), rotation);
     }
 

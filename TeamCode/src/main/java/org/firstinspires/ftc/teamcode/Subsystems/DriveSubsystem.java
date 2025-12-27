@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Utils.RobotStateRecoder;
 
 public class DriveSubsystem extends SubsystemBase {
 
@@ -20,8 +21,8 @@ public class DriveSubsystem extends SubsystemBase {
     private static final double PINPOINT_X_OFFSET_MM = 72;
     private static final double PINPOINT_Y_OFFSET_MM = -180.0;
     private final MecanumDrive drive;
-    private GoBildaPinpointDriver pinpoint;
     private final Telemetry telemetry;
+    private GoBildaPinpointDriver pinpoint;
     private Pose2d rawPose = new Pose2d(0, 0, 0);
     private Pose2d previousRawPose = new Pose2d(0, 0, 0);
     private Pose2d poseOffset = new Pose2d(0, 0, 0);
@@ -214,5 +215,13 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void setFieldCentricEnabled(boolean fieldCentricEnabled) {
         this.fieldCentricEnabled = fieldCentricEnabled;
+    }
+
+    public void applyDriverAlliance(final RobotStateRecoder.DriverAlliance alliance) {
+        if (alliance == RobotStateRecoder.DriverAlliance.RED) {
+            setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_RED_DEG);
+        } else {
+            setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_BLUE_DEG);
+        }
     }
 }

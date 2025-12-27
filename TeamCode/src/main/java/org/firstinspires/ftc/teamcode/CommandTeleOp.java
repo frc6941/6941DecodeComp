@@ -1,9 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.tuning.ShootTuning.TARGET_RPM;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.command.button.Trigger;
@@ -12,13 +16,17 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
+import org.firstinspires.ftc.teamcode.Commands.CloseShootOpenLoopCommand;
+import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
 import org.firstinspires.ftc.teamcode.Commands.IndexCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
+import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Commands.PreShootCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.Utils.RobotStateRecoder;
 
 @TeleOp(name = "TeleOp Drive (Command)", group = "Competition")
 public class CommandTeleOp extends CommandOpMode {
@@ -28,7 +36,6 @@ public class CommandTeleOp extends CommandOpMode {
     private FeederSubsystem feeder;
     private GamepadEx driverRC;
     private LimelightSubsystem limelight;
-    private DriverAlliance driverAlliance = DriverAlliance.BLUE;
 
     @Override
     public void initialize() {
@@ -39,11 +46,18 @@ public class CommandTeleOp extends CommandOpMode {
         driverRC = new GamepadEx(gamepad1);
         limelight = new LimelightSubsystem(hardwareMap);
 
-        applyDriverAlliance(DriverAlliance.BLUE);
         new GamepadButton(driverRC, GamepadKeys.Button.DPAD_LEFT)
-                .whenPressed(() -> applyDriverAlliance(DriverAlliance.RED));
+                .whenPressed(() ->
+                {
+                    RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.RED);
+                    drive.applyDriverAlliance(RobotStateRecoder.getDriverAlliance());
+                });
         new GamepadButton(driverRC, GamepadKeys.Button.DPAD_RIGHT)
-                .whenPressed(() -> applyDriverAlliance(DriverAlliance.BLUE));
+                .whenPressed(() ->
+                {
+                    RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
+                    drive.applyDriverAlliance(RobotStateRecoder.getDriverAlliance());
+                });
 
         new GamepadButton(driverRC, GamepadKeys.Button.START)
                 .whenPressed(drive::resetHeading);
@@ -63,14 +77,48 @@ public class CommandTeleOp extends CommandOpMode {
         final Trigger buttonA = new Trigger(
                 () -> driverRC.getButton(GamepadKeys.Button.A)
         );
-
+        final Trigger buttonB = new Trigger(
+                () -> driverRC.getButton(GamepadKeys.Button.B)
+        );
         final Trigger buttonX = new Trigger(
                 () -> driverRC.getButton(GamepadKeys.Button.X)
         );
+        final Trigger buttonY = new Trigger(
+                () -> driverRC.getButton(GamepadKeys.Button.Y)
+        );
+
+        buttonY.whileActiveOnce(
+                new InstantCommand(()
+                        -> RobotStateRecoder.setShootingPosition(
+                        RobotStateRecoder.ShootingPosition.FAR)));
+        buttonB.whileActiveOnce(
+                new InstantCommand(()
+                        -> RobotStateRecoder.setShootingPosition(
+                        RobotStateRecoder.ShootingPosition.MIDDLE)));
+
+        buttonA.whileActiveOnce(
+                new InstantCommand(()
+                        -> RobotStateRecoder.setShootingPosition(
+                        RobotStateRecoder.ShootingPosition.CLOSE)));
 
         rightTrigger.whileActiveOnce(
-                new CloseShootCommand(shooter, feeder, rightBumper)
+                new ConditionalCommand(
+                        new CloseShootCommand(shooter, feeder, rightBumper, () -> TARGET_RPM),
+                        new ConditionalCommand(
+                                new CloseShootOpenLoopCommand(shooter, feeder, rightBumper, 1.0),
+                                new CloseShootOpenLoopCommand(shooter, feeder, rightBumper, 0.9),
+                                () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
+                        ),
+                        () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
+                )
         );
+
+//        rightTrigger.whileActiveOnce(
+//                new CloseShootCommand(shooter, feeder, rightBumper)
+//        );
+//        rightTrigger.whileActiveOnce(
+//                new CloseShootOpenLoopCommand(shooter, feeder, rightBumper)
+//        );
         leftTrigger.whileActiveContinuous(
                 new IntakeCommand(feeder)
         );
@@ -78,29 +126,40 @@ public class CommandTeleOp extends CommandOpMode {
                 new IndexCommand(feeder, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
         );
 
-        buttonX.whileActiveContinuous(
-                new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
-        );
+//        buttonX.whileActiveContinuous(
+//                new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
+//        );
 
 //        rightTrigger.whileActiveContinuous(
 //                new LockHeadingCommand(
 //                        drive,
 //                        driverRC::getLeftX,
 //                        driverRC::getLeftY,
-//                        () -> {
-//                            final Pose2d goal = driverAlliance == DriverAlliance.BLUE
-//                                    ? Constants.Field.GOAL_BLUE
-//                                    : Constants.Field.GOAL_RED;
-//                            final Pose2d pose = drive.getPose();
-//
-//                            final double dx = goal.getX() - pose.getX();
-//                            final double dy = goal.getY() - pose.getY();
-//                            return Math.toDegrees(Math.atan2(dy, dx));
-//                        },
+//                        () -> LockHeadingTuning.TARGET_DEGREE,
 //                        2.0,
 //                        telemetry
 //                )
 //        );
+
+        rightTrigger.whileActiveContinuous(
+                new LockHeadingCommand(
+                        drive,
+                        driverRC::getLeftX,
+                        driverRC::getLeftY,
+                        () -> {
+                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                    ? Constants.Field.GOAL_BLUE
+                                    : Constants.Field.GOAL_RED;
+                            final Pose2d pose = drive.getPose();
+
+                            final double dx = goal.getX() - pose.getX();
+                            final double dy = goal.getY() - pose.getY();
+                            return Math.toDegrees(Math.atan2(dy, dx));
+                        },
+                        2.0,
+                        telemetry
+                )
+        );
         register(drive);
         register(shooter);
         register(feeder);
@@ -124,10 +183,17 @@ public class CommandTeleOp extends CommandOpMode {
                 )
         );
 
-//        buttonA.whileActiveOnce(new GoToPoseCommand(
-//                drive,
-//                driverAlliance == DriverAlliance.BLUE ? Constants.Field.GOAL_BLUE_FRONT : Constants.Field.GOAL_RED_FRONT,
-//                1));
+        if (RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.RED) {
+            buttonX.whileActiveOnce(new GoToPoseCommand(
+                    drive,
+                    Constants.Field.GOAL_RED_FRONT,
+                    1));
+        } else {
+            buttonX.whileActiveOnce(new GoToPoseCommand(
+                    drive,
+                    Constants.Field.GOAL_BLUE_FRONT,
+                    1));
+        }
 
     }
 
@@ -147,36 +213,19 @@ public class CommandTeleOp extends CommandOpMode {
             }
         });
 
-        telemetry.addData("LX(right +)", driverRC.getLeftX());
-        telemetry.addData("LY(fwd +)", driverRC.getLeftY());
-        telemetry.addData("RX(ccw +)", -driverRC.getRightX());
-        telemetry.addData("Driver Alliance", driverAlliance);
+//        telemetry.addData("LX(right +)", driverRC.getLeftX());
+//        telemetry.addData("LY(fwd +)", driverRC.getLeftY());
+//        telemetry.addData("RX(ccw +)", -driverRC.getRightX());
+        telemetry.addData("Driver Alliance", RobotStateRecoder.getDriverAlliance());
+        telemetry.addData("shooting Position", RobotStateRecoder.getShootingPosition());
         telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
         telemetry.addData("Shooter Rpm", shooter.getVelocityRpm());
-//        telemetry.addData("Leader Rpm", shooter.getLeaderVelocityRpm());
-//        telemetry.addData("Follower Rpm", shooter.getFollowerVelocityRpm());
-//        telemetry.addData("Shooter Rps", shooter.getVelocityRps());
-//        telemetry.addData("Shooter tpsEst", shooter.getDebugTicksPerSec());
-//        telemetry.addData("Shooter targetRps", shooter.getTargetRps());
-//        telemetry.addData("Shooter closedLoop", shooter.isVelocityClosedLoopEnabled());
 
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
         display.sendPoseWithGhost(pose, ghost);
         telemetry.update();
+
     }
 
-    private void applyDriverAlliance(final DriverAlliance alliance) {
-        driverAlliance = alliance;
-        if (alliance == DriverAlliance.RED) {
-            drive.setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_RED_DEG);
-        } else {
-            drive.setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_BLUE_DEG);
-        }
-    }
-
-    private enum DriverAlliance {
-        BLUE,
-        RED
-    }
 }

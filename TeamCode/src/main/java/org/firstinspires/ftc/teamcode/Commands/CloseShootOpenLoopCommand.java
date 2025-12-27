@@ -13,20 +13,23 @@ import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
 public class CloseShootOpenLoopCommand extends SequentialCommandGroup {
 
-    public CloseShootOpenLoopCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder, Trigger trigger) {
+    public CloseShootOpenLoopCommand(
+            final ShooterSubsystem shooter,
+            final FeederSubsystem feeder,
+            Trigger trigger,
+            double openLoop) {
         super(
                 new InstantCommand(() ->
                 {
-                    shooter.setOpenLoop(0.85);
-                    shooter.setTargetRpm(2500);
+                    shooter.setOpenLoop(openLoop);
                     feeder.setIntakeOpenLoop(Constants.Feeder.DEFAULT_INTAKE_POWER);
                 }),
                 new RepeatCommand(
                         new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> shooter.atTargetRpm()),
+                                new WaitUntilCommand(() -> trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
                                 new WaitCommand(20),
-                                new WaitUntilCommand(() -> !shooter.atTargetRpm()),
+                                new WaitUntilCommand(() -> !trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(0))
                         )).perpetually()
         );

@@ -26,11 +26,6 @@ public final class Constants {
         public static final double DRIVER_INPUT_OFFSET_BLUE_DEG = -90.0;
         public static final double DRIVER_INPUT_OFFSET_RED_DEG = 90.0;
 
-        public static final double TURN_kP = 0.05;
-        public static final double TURN_kI = 0.0;
-        public static final double TURN_kD = 0.000;
-        public static final double TURN_MAX_OUTPUT = 0.6;
-
         public static final double GOTO_POSE_X_kP = 0.045;
         public static final double GOTO_POSE_X_kI = 0.0;
         public static final double GOTO_POSE_X_kD = 0.0;
@@ -46,6 +41,13 @@ public final class Constants {
         public static final double GOTO_POSE_HEADING_TOLERANCE_DEG = 2.0;
         public static final double GOTO_POSE_MAX_TRANSLATION_OUTPUT = 0.6;
         public static final double GOTO_POSE_MAX_TURN_OUTPUT = 0.6;
+
+        // LockHeading（Dashboard 可通过 LockHeadingTuning 覆盖这些默认值）
+        public static final double LOCK_HEADING_TURN_kP = 0.05;
+        public static final double LOCK_HEADING_TURN_kI = 0.0;
+        public static final double LOCK_HEADING_TURN_kD = 0.0;
+        public static final double LOCK_HEADING_MAX_OUTPUT = 0.6;
+        public static final double LOCK_HEADING_TARGET_DEG = 0.0;
 
         private Drive() {
         }
@@ -95,6 +97,16 @@ public final class Constants {
         public static final double LATCH_OPEN_POS = 0.4;
         public static final double DEFAULT_POWER = 0.6;
 
+        // Shooter Velocity PIDF（Dashboard 可通过 ShooterPidTuning 覆盖这些默认值）
+        public static final double TARGET_RPM = 2000.0;
+        public static final double VELOCITY_kP = 400.0;
+        public static final double VELOCITY_kI = 0.0;
+        public static final double VELOCITY_kD = 0.0;
+        public static final double VELOCITY_kF = 11.7;
+        public static final double MIN_POWER = 0.0;
+        public static final double MAX_POWER = 1.0;
+        public static final double RPM_TOLERANCE = 200.0;
+
         private Shooter() {
         }
     }
@@ -106,7 +118,7 @@ public final class Constants {
         public static final Motor.GoBILDA ROLLER_GEARING = Motor.GoBILDA.RPM_1150;
         public static final boolean INTAKE_INVERTED = true;
         public static final boolean INDEX_INVERTED = true;
-        public static final double DEFAULT_INTAKE_POWER = 0.7;
+        public static final double DEFAULT_INTAKE_POWER = 1;
 
         public static final double SHOOT_INTAKE_POWER = 1.0;
         public static final double DEFAULT_INDEX_POWER = 1.0;//0.8
