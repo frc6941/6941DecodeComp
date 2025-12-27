@@ -51,6 +51,36 @@ public final class Constants {
         }
     }
 
+    public static final class Auto {
+
+        /**
+         * 只动底盘的“按时间驱动”自动参数（可按需求改）。 注意：这里的坐标约定和 TeleOp 保持一致： - leftX: 右为正 -
+         * leftY: 前为正 - rightX: 逆时针为正
+         */
+        public static final double DRIVE_SECONDS = 2;
+        public static final double DRIVE_LEFT_X = 0.0;
+        public static final double DRIVE_LEFT_Y = 0.25;
+        public static final double DRIVE_RIGHT_X = 0.0;
+
+        private Auto() {
+        }
+    }
+
+    public static final class NearShootAuto {
+
+        /**
+         * 只动底盘的“按时间驱动”自动参数（可按需求改）。 注意：这里的坐标约定和 TeleOp 保持一致： - leftX: 右为正 -
+         * leftY: 前为正 - rightX: 逆时针为正
+         */
+        public static final double DRIVE_SECONDS = 2;
+        public static final double DRIVE_LEFT_X = 0.25;
+        public static final double DRIVE_LEFT_Y = -0.25;
+        public static final double DRIVE_RIGHT_X = 0.0;
+
+        private NearShootAuto() {
+        }
+    }
+
     public static final class Shooter {
 
         public static final String LEADER_NAME = "shooterLeader";
