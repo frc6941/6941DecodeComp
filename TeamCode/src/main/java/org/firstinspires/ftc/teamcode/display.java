@@ -16,8 +16,18 @@ public final class display {
     private static final int TRAIL_LENGTH = 100;
 
     private static final List<Pose2d> trail = new ArrayList<>();
+    private static Pose2d targetPose = null;
 
-    private display() {}
+    private display() {
+    }
+
+    public static void setTargetPose(final Pose2d pose) {
+        targetPose = pose;
+    }
+
+    public static void clearTargetPose() {
+        targetPose = null;
+    }
 
     public static void sendPose(final Pose2d pose) {
         sendPoseWithGhost(pose, null);
@@ -47,6 +57,17 @@ public final class display {
             packet.put("LL_poseX_in", 0);
             packet.put("LL_poseY_in", 0);
             packet.put("LL_poseHeading_deg", 0);
+        }
+
+        if (targetPose != null) {
+            drawArrow(packet, targetPose, "#00FF00");
+            packet.put("Target_poseX_in", targetPose.getX());
+            packet.put("Target_poseY_in", targetPose.getY());
+            packet.put("Target_poseHeading_deg", Math.toDegrees(targetPose.getHeading()));
+        } else {
+            packet.put("Target_poseX_in", 0);
+            packet.put("Target_poseY_in", 0);
+            packet.put("Target_poseHeading_deg", 0);
         }
 
         if (trail.size() > 1) {
@@ -85,5 +106,3 @@ public final class display {
                 );
     }
 }
-
-

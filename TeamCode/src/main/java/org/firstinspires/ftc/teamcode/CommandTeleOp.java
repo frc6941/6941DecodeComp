@@ -65,6 +65,10 @@ public class CommandTeleOp extends CommandOpMode {
                 () -> driverRC.getButton(GamepadKeys.Button.A)
         );
 
+        final Trigger buttonX = new Trigger(
+                () -> driverRC.getButton(GamepadKeys.Button.X)
+        );
+
         rightTrigger.whileActiveOnce(
                 new CloseShootCommand(shooter, feeder, rightBumper)
         );
@@ -73,6 +77,10 @@ public class CommandTeleOp extends CommandOpMode {
         );
         leftBumper.whileActiveContinuous(
                 new IndexCommand(feeder, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
+        );
+
+        buttonX.whileActiveContinuous(
+                new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
         );
 
         rightTrigger.whileActiveContinuous(
@@ -116,6 +124,11 @@ public class CommandTeleOp extends CommandOpMode {
                         feeder
                 )
         );
+
+//        buttonA.whileActiveOnce(new GoToPoseCommand(
+//                drive,
+//                driverAlliance == DriverAlliance.BLUE ? Constants.Field.GOAL_BLUE_FRONT : Constants.Field.GOAL_RED_FRONT,
+//                1));
 
     }
 

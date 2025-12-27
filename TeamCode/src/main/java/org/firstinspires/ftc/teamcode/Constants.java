@@ -31,6 +31,22 @@ public final class Constants {
         public static final double TURN_kD = 0.000;
         public static final double TURN_MAX_OUTPUT = 0.6;
 
+        public static final double GOTO_POSE_X_kP = 0.045;
+        public static final double GOTO_POSE_X_kI = 0.0;
+        public static final double GOTO_POSE_X_kD = 0.0;
+
+        public static final double GOTO_POSE_Y_kP = 0.045;
+        public static final double GOTO_POSE_Y_kI = 0.0;
+        public static final double GOTO_POSE_Y_kD = 0.0;
+
+        public static final double GOTO_POSE_TURN_kP = 0.05;
+        public static final double GOTO_POSE_TURN_kI = 0.0;
+        public static final double GOTO_POSE_TURN_kD = 0.0;
+
+        public static final double GOTO_POSE_HEADING_TOLERANCE_DEG = 2.0;
+        public static final double GOTO_POSE_MAX_TRANSLATION_OUTPUT = 0.6;
+        public static final double GOTO_POSE_MAX_TURN_OUTPUT = 0.6;
+
         private Drive() {
         }
     }
@@ -71,5 +87,8 @@ public final class Constants {
 
         public static final Pose2d GOAL_BLUE = new Pose2d(-70, -70, 0);
         public static final Pose2d GOAL_RED = new Pose2d(-70, +70, 0);
+
+        public static final Pose2d GOAL_BLUE_FRONT = new Pose2d(-37, -37, 0);
+        public static final Pose2d GOAL_RED_FRONT = new Pose2d(-37, +37, 0);
     }
 }

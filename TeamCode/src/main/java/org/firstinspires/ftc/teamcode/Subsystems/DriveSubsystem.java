@@ -190,4 +190,8 @@ public class DriveSubsystem extends SubsystemBase {
                 angleWrap(base.getHeading() + offset.getHeading())
         );
     }
+
+    public void setFieldCentricEnabled(boolean fieldCentricEnabled) {
+        this.fieldCentricEnabled = fieldCentricEnabled;
+    }
 }
