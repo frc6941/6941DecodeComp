@@ -72,6 +72,7 @@ public class GoToPoseCommand extends CommandBase {
     public void initialize() {
         savedDriverInputOffsetDeg = drive.getDriverInputOffsetDeg();
         drive.setDriverInputOffsetDeg(0.0);
+        drive.setFieldCentricEnabled(false);
         display.setTargetPose(targetPose);
         translationController.reset();
         headingController.reset();
@@ -114,9 +115,6 @@ public class GoToPoseCommand extends CommandBase {
         final double vxRobot = vNorm * Math.cos(dirRobotRad);
         final double vyRobot = vNorm * Math.sin(dirRobotRad);
 
-        final double vxField = vxRobot * cos - vyRobot * sin;
-        final double vyField = vxRobot * sin + vyRobot * cos;
-
         final double targetHeadingDeg = Math.toDegrees(targetPose.getHeading());
         final double currentHeadingDeg = headingDegForTransform;
         final double headingErrorDeg = shortestDelta360(targetHeadingDeg, currentHeadingDeg);
@@ -130,13 +128,14 @@ public class GoToPoseCommand extends CommandBase {
         double turnOut = headingController.calculate(-adjustedHeadingErrorDeg);
         turnOut = clamp(turnOut, -maxTurnOutput, maxTurnOutput);
 
-        drive.drive(vxField, vyField, turnOut);
+        drive.drive(vxRobot, vyRobot, turnOut);
     }
 
     @Override
     public void end(final boolean interrupted) {
         drive.stop();
         drive.setDriverInputOffsetDeg(savedDriverInputOffsetDeg);
+        drive.setFieldCentricEnabled(true);
         display.clearTargetPose();
     }
 

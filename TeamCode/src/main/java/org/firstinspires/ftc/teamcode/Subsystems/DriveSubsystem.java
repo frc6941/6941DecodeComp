@@ -82,13 +82,13 @@ public class DriveSubsystem extends SubsystemBase {
         double deltaHeading = rawPose.getHeading() - previousRawPose.getHeading();
         double deltaDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        // 记录到telemetry
-        if (telemetry != null) {
-            telemetry.addData("Pinpoint Delta X", "%.3f in", deltaX);
-            telemetry.addData("Pinpoint Delta Y", "%.3f in", deltaY);
-            telemetry.addData("Pinpoint Delta Distance", "%.3f in", deltaDistance);
-            telemetry.addData("Pinpoint Delta Heading", "%.3f rad", deltaHeading);
-        }
+//        // 记录到telemetry
+//        if (telemetry != null) {
+//            telemetry.addData("Pinpoint Delta X", "%.3f in", deltaX);
+//            telemetry.addData("Pinpoint Delta Y", "%.3f in", deltaY);
+//            telemetry.addData("Pinpoint Delta Distance", "%.3f in", deltaDistance);
+//            telemetry.addData("Pinpoint Delta Heading", "%.3f rad", deltaHeading);
+//        }
     }
 
     public void drive(final double leftX, final double leftY, final double rightX) {
