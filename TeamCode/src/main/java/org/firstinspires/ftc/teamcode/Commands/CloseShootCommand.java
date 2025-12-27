@@ -33,4 +33,30 @@ public class CloseShootCommand extends SequentialCommandGroup {
         );
         addRequirements(feeder, shooter);
     }
+
+    public CloseShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder, DoubleSupplier targetRpm, long timeMs) {
+        super(
+                new InstantCommand(() ->
+                {
+                    shooter.setVelocityRpm(targetRpm.getAsDouble());
+                    feeder.setIntakeOpenLoop(Constants.Feeder.SHOOT_INTAKE_POWER);
+                }),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.atTargetRpm()).withTimeout(timeMs),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
+                        new WaitCommand(100),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.atTargetRpm()).withTimeout(timeMs),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
+                        new WaitCommand(100),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))),
+                new SequentialCommandGroup(
+                        new WaitUntilCommand(() -> shooter.atTargetRpm()).withTimeout(timeMs),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
+                        new WaitCommand(100),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0)))
+        );
+        addRequirements(feeder, shooter);
+    }
 }

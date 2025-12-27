@@ -26,21 +26,21 @@ public final class Constants {
         public static final double DRIVER_INPUT_OFFSET_BLUE_DEG = -90.0;
         public static final double DRIVER_INPUT_OFFSET_RED_DEG = 90.0;
 
-        public static final double GOTO_POSE_X_kP = 0.045;
+        public static final double GOTO_POSE_X_kP = 0.08;
         public static final double GOTO_POSE_X_kI = 0.0;
         public static final double GOTO_POSE_X_kD = 0.0;
 
-        public static final double GOTO_POSE_Y_kP = 0.045;
+        public static final double GOTO_POSE_Y_kP = 0.08;
         public static final double GOTO_POSE_Y_kI = 0.0;
         public static final double GOTO_POSE_Y_kD = 0.0;
 
-        public static final double GOTO_POSE_TURN_kP = 0.05;
+        public static final double GOTO_POSE_TURN_kP = 0.1;
         public static final double GOTO_POSE_TURN_kI = 0.0;
         public static final double GOTO_POSE_TURN_kD = 0.0;
 
         public static final double GOTO_POSE_HEADING_TOLERANCE_DEG = 2.0;
-        public static final double GOTO_POSE_MAX_TRANSLATION_OUTPUT = 0.6;
-        public static final double GOTO_POSE_MAX_TURN_OUTPUT = 0.6;
+        public static final double GOTO_POSE_MAX_TRANSLATION_OUTPUT = 1.0;
+        public static final double GOTO_POSE_MAX_TURN_OUTPUT = 1.0;
 
         // LockHeading（Dashboard 可通过 LockHeadingTuning 覆盖这些默认值）
         public static final double LOCK_HEADING_TURN_kP = 0.05;
@@ -129,10 +129,16 @@ public final class Constants {
 
     public final static class Field {
 
-        public static final Pose2d GOAL_BLUE = new Pose2d(-70, -70, 0);
-        public static final Pose2d GOAL_RED = new Pose2d(-70, +70, 0);
+        public static final Pose2d GOAL_BLUE = new Pose2d(-60, -60, 0);
+        public static final Pose2d GOAL_RED = new Pose2d(-60, +60, 0);
 
-        public static final Pose2d GOAL_BLUE_FRONT = new Pose2d(-37, -37, 0);
-        public static final Pose2d GOAL_RED_FRONT = new Pose2d(-37, +37, 0);
+        public static final Pose2d GOAL_BLUE_CLOSE = new Pose2d(-20, -20, 0);
+        public static final Pose2d GOAL_RED_CLOSE = new Pose2d(-20, +20, 0);
+        public static final Pose2d GOAL_BLUE_MIDDLE = new Pose2d(-0, -0, 0);
+        public static final Pose2d GOAL_RED_MIDDLE = new Pose2d(-0, +0, 0);
+        public static final Pose2d GOAL_BLUE_FAR = new Pose2d(+20, -20, 0);
+        public static final Pose2d GOAL_RED_FAR = new Pose2d(+20, +20, 0);
+        public static final Pose2d STOP_BLUE_FAR = new Pose2d(+50, -30, 0);
+        public static final Pose2d STOP_RED_FAR = new Pose2d(50, +30, 0);
     }
 }

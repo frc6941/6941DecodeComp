@@ -59,8 +59,14 @@ public class CommandTeleOp extends CommandOpMode {
                     drive.applyDriverAlliance(RobotStateRecoder.getDriverAlliance());
                 });
 
-        new GamepadButton(driverRC, GamepadKeys.Button.START)
-                .whenPressed(drive::resetHeading);
+        new GamepadButton(driverRC, GamepadKeys.Button.DPAD_DOWN)
+                .whenPressed(() ->
+                {
+                    RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
+                    drive.applyDriverAlliance(RobotStateRecoder.getDriverAlliance());
+                });
+
+        final Trigger DPAD_DOWN = new Trigger(() -> driverRC.getButton(GamepadKeys.Button.DPAD_DOWN));
 
         final Trigger leftTrigger = new Trigger(
                 () -> driverRC.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.5
@@ -106,7 +112,7 @@ public class CommandTeleOp extends CommandOpMode {
                         new CloseShootCommand(shooter, feeder, rightBumper, () -> TARGET_RPM),
                         new ConditionalCommand(
                                 new CloseShootOpenLoopCommand(shooter, feeder, rightBumper, 1.0),
-                                new CloseShootOpenLoopCommand(shooter, feeder, rightBumper, 0.9),
+                                new CloseShootCommand(shooter, feeder, rightBumper, () -> 3200),
                                 () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
                         ),
                         () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
@@ -126,9 +132,9 @@ public class CommandTeleOp extends CommandOpMode {
                 new IndexCommand(feeder, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
         );
 
-//        buttonX.whileActiveContinuous(
-//                new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
-//        );
+        DPAD_DOWN.whileActiveContinuous(
+                new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
+        );
 
 //        rightTrigger.whileActiveContinuous(
 //                new LockHeadingCommand(
@@ -184,16 +190,31 @@ public class CommandTeleOp extends CommandOpMode {
         );
 
         if (RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.RED) {
-            buttonX.whileActiveOnce(new GoToPoseCommand(
-                    drive,
-                    Constants.Field.GOAL_RED_FRONT,
-                    1));
+            buttonX.whileActiveOnce(
+                    new ConditionalCommand(
+                            new GoToPoseCommand(drive, Constants.Field.GOAL_RED_CLOSE, 0.5),
+                            new ConditionalCommand(
+                                    new GoToPoseCommand(drive, Constants.Field.GOAL_RED_FAR, 0.5),
+                                    new GoToPoseCommand(drive, Constants.Field.GOAL_RED_MIDDLE, 0.5),
+                                    () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
+                            ),
+                            () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
+                    )
+            );
         } else {
-            buttonX.whileActiveOnce(new GoToPoseCommand(
-                    drive,
-                    Constants.Field.GOAL_BLUE_FRONT,
-                    1));
+            buttonX.whileActiveOnce(
+                    new ConditionalCommand(
+                            new GoToPoseCommand(drive, Constants.Field.GOAL_BLUE_CLOSE, 0.5),
+                            new ConditionalCommand(
+                                    new GoToPoseCommand(drive, Constants.Field.GOAL_BLUE_FAR, 0.5),
+                                    new GoToPoseCommand(drive, Constants.Field.GOAL_BLUE_MIDDLE, 0.5),
+                                    () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
+                            ),
+                            () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
+                    )
+            );
         }
+        drive.setFieldCentricEnabled(true);
 
     }
 

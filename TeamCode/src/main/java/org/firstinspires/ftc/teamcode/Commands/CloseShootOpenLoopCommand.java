@@ -35,4 +35,37 @@ public class CloseShootOpenLoopCommand extends SequentialCommandGroup {
         );
         addRequirements(feeder, shooter);
     }
+
+    public CloseShootOpenLoopCommand(
+            final ShooterSubsystem shooter,
+            final FeederSubsystem feeder,
+            double openLoop,
+            long waitTimeMs) {
+        super(
+                new InstantCommand(() ->
+                {
+                    shooter.setOpenLoop(openLoop);
+                    feeder.setIntakeOpenLoop(Constants.Feeder.DEFAULT_INTAKE_POWER);
+                }),
+
+                new SequentialCommandGroup(
+                        new WaitCommand(waitTimeMs),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
+                        new WaitCommand(200),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))
+                ),
+                new SequentialCommandGroup(
+                        new WaitCommand(waitTimeMs),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
+                        new WaitCommand(200),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))
+                ), new SequentialCommandGroup(
+                        new WaitCommand(waitTimeMs),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
+                        new WaitCommand(200),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))
+                )
+        );
+        addRequirements(feeder, shooter);
+    }
 }

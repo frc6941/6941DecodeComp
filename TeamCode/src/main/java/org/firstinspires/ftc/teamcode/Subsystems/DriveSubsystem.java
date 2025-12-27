@@ -217,6 +217,10 @@ public class DriveSubsystem extends SubsystemBase {
         this.fieldCentricEnabled = fieldCentricEnabled;
     }
 
+    public boolean isFieldCentricEnabled() {
+        return fieldCentricEnabled;
+    }
+
     public void applyDriverAlliance(final RobotStateRecoder.DriverAlliance alliance) {
         if (alliance == RobotStateRecoder.DriverAlliance.RED) {
             setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_RED_DEG);
