@@ -62,6 +62,10 @@ public class ShooterSubsystem extends SubsystemBase {
         return targetRpm;
     }
 
+    public void setTargetRpm(double targetRpm) {
+        this.targetRpm = targetRpm;
+    }
+
     public double getLastAppliedPower() {
         return lastAppliedPower;
     }
@@ -99,7 +103,7 @@ public class ShooterSubsystem extends SubsystemBase {
             if (!wasWithinTolerance) {
                 timer.reset();
             }
-            atTargetRpm = timer.seconds() >= 1;
+            atTargetRpm = timer.seconds() >= 0.1;
         } else {
             atTargetRpm = false;
             timer.reset();

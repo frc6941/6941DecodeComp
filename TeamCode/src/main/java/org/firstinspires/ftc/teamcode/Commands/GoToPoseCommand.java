@@ -15,26 +15,34 @@ public class GoToPoseCommand extends CommandBase {
     private final Pose2d targetPose;
     private final double toleranceIn;
 
-    private final PIDController translationController;
+    // 注意：DriveSubsystem 的手柄语义是：leftX=右+、leftY=前+、rightX=逆时针+
+    // 而 PinPoint 里程计坐标约定是：x=左+、y=前+（见 DriveSubsystem 顶部注释）
+    // 所以这里用两个平移 PID（X=左右、Y=前后）并显式处理符号，避免坐标系混用导致控制方向错误。
+    private final PIDController strafeController;
+    private final PIDController forwardController;
     private final PIDController headingController;
 
     private double headingToleranceDeg;
     private double maxTranslationOutput;
     private double maxTurnOutput;
-    private double rotationAdjustmentMaxDeg;
 
     private double savedDriverInputOffsetDeg = 0.0;
-    private double lastHeadingErrorDeg = 0.0;
+    private boolean savedFieldCentricEnabled = true;
 
     public GoToPoseCommand(final DriveSubsystem drive, final Pose2d targetPose, final double toleranceIn) {
         this.drive = drive;
         this.targetPose = targetPose;
         this.toleranceIn = toleranceIn;
 
-        translationController = new PIDController(
+        strafeController = new PIDController(
                 Constants.Drive.GOTO_POSE_X_kP,
                 Constants.Drive.GOTO_POSE_X_kI,
                 Constants.Drive.GOTO_POSE_X_kD
+        );
+        forwardController = new PIDController(
+                Constants.Drive.GOTO_POSE_Y_kP,
+                Constants.Drive.GOTO_POSE_Y_kI,
+                Constants.Drive.GOTO_POSE_Y_kD
         );
         headingController = new PIDController(
                 Constants.Drive.GOTO_POSE_TURN_kP,
@@ -45,18 +53,20 @@ public class GoToPoseCommand extends CommandBase {
         headingToleranceDeg = Constants.Drive.GOTO_POSE_HEADING_TOLERANCE_DEG;
         maxTranslationOutput = Constants.Drive.GOTO_POSE_MAX_TRANSLATION_OUTPUT;
         maxTurnOutput = Constants.Drive.GOTO_POSE_MAX_TURN_OUTPUT;
-        rotationAdjustmentMaxDeg = 0.0;
 
-        translationController.setSetPoint(0.0);
+        strafeController.setSetPoint(0.0);
+        forwardController.setSetPoint(0.0);
         headingController.setSetPoint(0.0);
 
-        translationController.setTolerance(toleranceIn);
+        strafeController.setTolerance(toleranceIn);
+        forwardController.setTolerance(toleranceIn);
 
         addRequirements(drive);
     }
 
     public void setTranslationPID(final double kP, final double kI, final double kD) {
-        translationController.setPID(kP, kI, kD);
+        strafeController.setPID(kP, kI, kD);
+        forwardController.setPID(kP, kI, kD);
     }
 
     public void setTurnPID(final double kP, final double kI, final double kD) {
@@ -71,18 +81,27 @@ public class GoToPoseCommand extends CommandBase {
     @Override
     public void initialize() {
         savedDriverInputOffsetDeg = drive.getDriverInputOffsetDeg();
+        savedFieldCentricEnabled = drive.isFieldCentricEnabled();
         drive.setDriverInputOffsetDeg(0.0);
+        // GoToPose 使用 field-centric：输入用“场地坐标系”的 X/Y（经符号适配后符合手柄语义），由 DriveSubsystem 负责转换到机器人坐标。
+        drive.setFieldCentricEnabled(true);
         display.setTargetPose(targetPose);
-        translationController.reset();
+        strafeController.reset();
+        forwardController.reset();
         headingController.reset();
-        translationController.setSetPoint(0.0);
+        strafeController.setSetPoint(0.0);
+        forwardController.setSetPoint(0.0);
         headingController.setSetPoint(0.0);
-        lastHeadingErrorDeg = 0.0;
     }
 
     @Override
     public void execute() {
-        translationController.setPID(
+        strafeController.setPID(
+                GoToPoseTuning.TRANSLATION_kP,
+                GoToPoseTuning.TRANSLATION_kI,
+                GoToPoseTuning.TRANSLATION_kD
+        );
+        forwardController.setPID(
                 GoToPoseTuning.TRANSLATION_kP,
                 GoToPoseTuning.TRANSLATION_kI,
                 GoToPoseTuning.TRANSLATION_kD
@@ -91,62 +110,57 @@ public class GoToPoseCommand extends CommandBase {
         headingToleranceDeg = GoToPoseTuning.HEADING_TOLERANCE_DEG;
         maxTranslationOutput = GoToPoseTuning.MAX_TRANSLATION_OUTPUT;
         maxTurnOutput = GoToPoseTuning.MAX_TURN_OUTPUT;
-        rotationAdjustmentMaxDeg = GoToPoseTuning.ROTATION_ADJUSTMENT_MAX_DEG;
         headingController.setTolerance(headingToleranceDeg);
 
         final Pose2d pose = drive.getPose();
-        final double dx = targetPose.getX() - pose.getX();
-        final double dy = targetPose.getY() - pose.getY();
+        // pose / target 的坐标：y=左+，x=前+（in）
+        final double dxLeftIn = targetPose.getY() - pose.getY();
+        final double dyFwdIn = targetPose.getX() - pose.getX();
+        // DriveSubsystem.drive 的输入：leftX=右+、leftY=前+
+        double strafeOut = strafeController.calculate(-dxLeftIn, 0.0);     // dxLeft>0 => 输出<0 => 往左走（正确）
+        double forwardOut = forwardController.calculate(dyFwdIn, 0.0);   // dyFwd>0 => 先取负，再 PID => 输出>0 => 往前走（正确）
 
-        final double headingDegForTransform = drive.getHeadingDegrees();
-        final double headingRad = Math.toRadians(headingDegForTransform);
-        final double cos = Math.cos(headingRad);
-        final double sin = Math.sin(headingRad);
+        strafeOut = clamp(strafeOut, -maxTranslationOutput, maxTranslationOutput);
+        forwardOut = clamp(forwardOut, -maxTranslationOutput, maxTranslationOutput);
 
-        final double xErrRobot = dx * cos + dy * sin;
-        final double yErrRobot = -dx * sin + dy * cos;
+        // 对角线合成限幅：保持方向但不让合速度超过 maxTranslationOutput
+        final double mag = Math.hypot(strafeOut, forwardOut);
+        if (mag > maxTranslationOutput && mag > 1e-9) {
+            final double s = maxTranslationOutput / mag;
+            strafeOut *= s;
+            forwardOut *= s;
+        }
 
-        final double distErr = Math.hypot(xErrRobot, yErrRobot);
-        double vNorm = -translationController.calculate(distErr, 0.0);
-        vNorm = clamp(vNorm, 0.0, maxTranslationOutput);
-
-        final double dirRobotRad = Math.atan2(yErrRobot, xErrRobot);
-        final double vxRobot = vNorm * Math.cos(dirRobotRad);
-        final double vyRobot = vNorm * Math.sin(dirRobotRad);
-
-        final double vxField = vxRobot * cos - vyRobot * sin;
-        final double vyField = vxRobot * sin + vyRobot * cos;
-
+        // 朝向控制：使用 DriveSubsystem.getHeadingDegrees() 的参考系（与 field-centric 和 LockHeadingCommand 保持一致）
         final double targetHeadingDeg = Math.toDegrees(targetPose.getHeading());
-        final double currentHeadingDeg = headingDegForTransform;
+        final double currentHeadingDeg = Math.toDegrees(drive.getPose().getHeading());
         final double headingErrorDeg = shortestDelta360(targetHeadingDeg, currentHeadingDeg);
-        final double dirRobotDeg = Math.toDegrees(dirRobotRad);
-        final double adjustedHeadingErrorDeg = clamp(
-                dirRobotDeg,
-                headingErrorDeg - Math.abs(rotationAdjustmentMaxDeg),
-                headingErrorDeg + Math.abs(rotationAdjustmentMaxDeg)
-        );
-        lastHeadingErrorDeg = headingErrorDeg;
-        double turnOut = headingController.calculate(-adjustedHeadingErrorDeg);
+        double turnOut = headingController.calculate(-headingErrorDeg);
         turnOut = clamp(turnOut, -maxTurnOutput, maxTurnOutput);
 
-        drive.drive(vxField, vyField, turnOut);
+        drive.drive(-strafeOut, -forwardOut, turnOut);
     }
 
     @Override
     public void end(final boolean interrupted) {
         drive.stop();
         drive.setDriverInputOffsetDeg(savedDriverInputOffsetDeg);
+        drive.setFieldCentricEnabled(savedFieldCentricEnabled);
         display.clearTargetPose();
     }
 
     @Override
     public boolean isFinished() {
         final Pose2d pose = drive.getPose();
-        final double dx = targetPose.getX() - pose.getX();
-        final double dy = targetPose.getY() - pose.getY();
-        final double distance = Math.hypot(dx, dy);
-        return distance <= toleranceIn && Math.abs(lastHeadingErrorDeg) <= headingToleranceDeg;
+        final double dxLeftIn = targetPose.getX() - pose.getX();
+        final double dyFwdIn = targetPose.getY() - pose.getY();
+        final double distance = Math.hypot(dxLeftIn, dyFwdIn);
+
+        final double targetHeadingDeg = Math.toDegrees(targetPose.getHeading());
+        final double currentHeadingDeg = Math.toDegrees(drive.getPose().getHeading());
+        final double headingErrorDeg = shortestDelta360(targetHeadingDeg, currentHeadingDeg);
+
+        return distance <= toleranceIn && Math.abs(headingErrorDeg) <= headingToleranceDeg;
     }
 
     private double shortestDelta360(final double targetDeg, final double currentDeg) {

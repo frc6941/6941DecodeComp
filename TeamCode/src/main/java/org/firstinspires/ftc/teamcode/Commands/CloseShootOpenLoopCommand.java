@@ -11,51 +11,60 @@ import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
-import java.util.function.DoubleSupplier;
+public class CloseShootOpenLoopCommand extends SequentialCommandGroup {
 
-public class CloseShootCommand extends SequentialCommandGroup {
-
-    public CloseShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder, Trigger trigger, DoubleSupplier targetRpm) {
+    public CloseShootOpenLoopCommand(
+            final ShooterSubsystem shooter,
+            final FeederSubsystem feeder,
+            Trigger trigger,
+            double openLoop) {
         super(
                 new InstantCommand(() ->
                 {
-                    shooter.setVelocityRpm(targetRpm.getAsDouble());
-                    feeder.setIntakeOpenLoop(Constants.Feeder.SHOOT_INTAKE_POWER);
+                    shooter.setOpenLoop(openLoop);
+                    feeder.setIntakeOpenLoop(Constants.Feeder.DEFAULT_INTAKE_POWER);
                 }),
                 new RepeatCommand(
                         new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> trigger.get() || shooter.atTargetRpm()),
+                                new WaitUntilCommand(() -> trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
                                 new WaitCommand(20),
-                                new WaitUntilCommand(() -> !shooter.atTargetRpm()),
+                                new WaitUntilCommand(() -> !trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(0))
                         )).perpetually()
         );
         addRequirements(feeder, shooter);
     }
 
-    public CloseShootCommand(final ShooterSubsystem shooter, final FeederSubsystem feeder, DoubleSupplier targetRpm, long timeMs) {
+    public CloseShootOpenLoopCommand(
+            final ShooterSubsystem shooter,
+            final FeederSubsystem feeder,
+            double openLoop,
+            long waitTimeMs) {
         super(
                 new InstantCommand(() ->
                 {
-                    shooter.setVelocityRpm(targetRpm.getAsDouble());
-                    feeder.setIntakeOpenLoop(Constants.Feeder.SHOOT_INTAKE_POWER);
+                    shooter.setOpenLoop(openLoop);
+                    feeder.setIntakeOpenLoop(Constants.Feeder.DEFAULT_INTAKE_POWER);
                 }),
+
                 new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.atTargetRpm()).withTimeout(timeMs),
+                        new WaitCommand(waitTimeMs),
                         new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
-                        new WaitCommand(100),
-                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))),
+                        new WaitCommand(200),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))
+                ),
                 new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.atTargetRpm()).withTimeout(timeMs),
+                        new WaitCommand(waitTimeMs),
                         new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
-                        new WaitCommand(100),
-                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))),
-                new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> shooter.atTargetRpm()).withTimeout(timeMs),
+                        new WaitCommand(200),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))
+                ), new SequentialCommandGroup(
+                        new WaitCommand(waitTimeMs),
                         new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
-                        new WaitCommand(100),
-                        new InstantCommand(() -> feeder.setIndexOpenLoop(0)))
+                        new WaitCommand(200),
+                        new InstantCommand(() -> feeder.setIndexOpenLoop(0))
+                )
         );
         addRequirements(feeder, shooter);
     }

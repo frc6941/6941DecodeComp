@@ -21,8 +21,7 @@ public class NearShoot extends CommandOpMode {
 
         drive = new DriveSubsystem(hardwareMap, telemetry);
         register(drive);
-
-        // 自动阶段只做“按摇杆坐标驱动”，避免 field-centric 依赖 IMU/里程计造成不确定性
+        
         drive.setFieldCentricEnabled(false);
         drive.resetHeading();
 

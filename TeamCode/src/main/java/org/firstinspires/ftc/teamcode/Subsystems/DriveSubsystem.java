@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Utils.RobotStateRecoder;
 
 public class DriveSubsystem extends SubsystemBase {
 
@@ -20,8 +21,8 @@ public class DriveSubsystem extends SubsystemBase {
     private static final double PINPOINT_X_OFFSET_MM = 72;
     private static final double PINPOINT_Y_OFFSET_MM = -180.0;
     private final MecanumDrive drive;
-    private GoBildaPinpointDriver pinpoint;
     private final Telemetry telemetry;
+    private GoBildaPinpointDriver pinpoint;
     private Pose2d rawPose = new Pose2d(0, 0, 0);
     private Pose2d previousRawPose = new Pose2d(0, 0, 0);
     private Pose2d poseOffset = new Pose2d(0, 0, 0);
@@ -81,13 +82,13 @@ public class DriveSubsystem extends SubsystemBase {
         double deltaHeading = rawPose.getHeading() - previousRawPose.getHeading();
         double deltaDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        // 记录到telemetry
-        if (telemetry != null) {
-            telemetry.addData("Pinpoint Delta X", "%.3f in", deltaX);
-            telemetry.addData("Pinpoint Delta Y", "%.3f in", deltaY);
-            telemetry.addData("Pinpoint Delta Distance", "%.3f in", deltaDistance);
-            telemetry.addData("Pinpoint Delta Heading", "%.3f rad", deltaHeading);
-        }
+//        // 记录到telemetry
+//        if (telemetry != null) {
+//            telemetry.addData("Pinpoint Delta X", "%.3f in", deltaX);
+//            telemetry.addData("Pinpoint Delta Y", "%.3f in", deltaY);
+//            telemetry.addData("Pinpoint Delta Distance", "%.3f in", deltaDistance);
+//            telemetry.addData("Pinpoint Delta Heading", "%.3f rad", deltaHeading);
+//        }
     }
 
     public void drive(final double leftX, final double leftY, final double rightX) {
@@ -214,5 +215,17 @@ public class DriveSubsystem extends SubsystemBase {
 
     public void setFieldCentricEnabled(boolean fieldCentricEnabled) {
         this.fieldCentricEnabled = fieldCentricEnabled;
+    }
+
+    public boolean isFieldCentricEnabled() {
+        return fieldCentricEnabled;
+    }
+
+    public void applyDriverAlliance(final RobotStateRecoder.DriverAlliance alliance) {
+        if (alliance == RobotStateRecoder.DriverAlliance.RED) {
+            setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_RED_DEG);
+        } else {
+            setDriverInputOffsetDeg(Constants.Drive.DRIVER_INPUT_OFFSET_BLUE_DEG);
+        }
     }
 }
