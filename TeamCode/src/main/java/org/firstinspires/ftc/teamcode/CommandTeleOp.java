@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.RepeatCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.command.button.Trigger;
@@ -21,7 +22,7 @@ import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
 import org.firstinspires.ftc.teamcode.Commands.IndexCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
-import org.firstinspires.ftc.teamcode.Commands.PreShootCommand;
+import org.firstinspires.ftc.teamcode.Subsystems.BeamBreakSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
@@ -37,6 +38,8 @@ public class CommandTeleOp extends CommandOpMode {
     private GamepadEx driverRC;
     private LimelightSubsystem limelight;
 
+    private BeamBreakSubsystem beamBreak;
+
     @Override
     public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -45,6 +48,7 @@ public class CommandTeleOp extends CommandOpMode {
         feeder = new FeederSubsystem(hardwareMap);
         driverRC = new GamepadEx(gamepad1);
         limelight = new LimelightSubsystem(hardwareMap);
+        beamBreak = new BeamBreakSubsystem(hardwareMap, "shooterBB", 0.5);
 
         new GamepadButton(driverRC, GamepadKeys.Button.DPAD_LEFT)
                 .whenPressed(() ->
@@ -180,7 +184,8 @@ public class CommandTeleOp extends CommandOpMode {
                 )
         );
         shooter.setDefaultCommand(
-                new PreShootCommand(shooter)
+                new RepeatCommand(
+                        new InstantCommand(() -> shooter.setVelocityRpm(3200), shooter))
         );
         feeder.setDefaultCommand(
                 new RunCommand(
@@ -241,6 +246,7 @@ public class CommandTeleOp extends CommandOpMode {
         telemetry.addData("shooting Position", RobotStateRecoder.getShootingPosition());
         telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
         telemetry.addData("Shooter Rpm", shooter.getVelocityRpm());
+        telemetry.addData("BB Volt", beamBreak.getVoltage());
 
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
