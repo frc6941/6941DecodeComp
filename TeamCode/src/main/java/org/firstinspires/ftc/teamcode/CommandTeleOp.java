@@ -19,7 +19,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.CloseShootOpenLoopCommand;
 import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
-import org.firstinspires.ftc.teamcode.Commands.IndexCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Subsystems.BeamBreakSubsystem;
@@ -48,7 +47,7 @@ public class CommandTeleOp extends CommandOpMode {
         feeder = new FeederSubsystem(hardwareMap);
         driverRC = new GamepadEx(gamepad1);
         limelight = new LimelightSubsystem(hardwareMap);
-        beamBreak = new BeamBreakSubsystem(hardwareMap, "shooterBB", 0.5);
+        beamBreak = new BeamBreakSubsystem(hardwareMap, "shooterBB", 1.0);
 
         new GamepadButton(driverRC, GamepadKeys.Button.DPAD_LEFT)
                 .whenPressed(() ->
@@ -69,6 +68,9 @@ public class CommandTeleOp extends CommandOpMode {
                     RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
                     drive.applyDriverAlliance(RobotStateRecoder.getDriverAlliance());
                 });
+
+        new GamepadButton(driverRC, GamepadKeys.Button.START)
+                .whenPressed(drive::resetHeading);
 
         final Trigger DPAD_DOWN = new Trigger(() -> driverRC.getButton(GamepadKeys.Button.DPAD_DOWN));
 
@@ -130,14 +132,14 @@ public class CommandTeleOp extends CommandOpMode {
 //                new CloseShootOpenLoopCommand(shooter, feeder, rightBumper)
 //        );
         leftTrigger.whileActiveContinuous(
-                new IntakeCommand(feeder)
+                new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), Constants.Feeder.DEFAULT_INTAKE_POWER, 0.6)
         );
         leftBumper.whileActiveContinuous(
-                new IndexCommand(feeder, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
+                new IntakeCommand(feeder, () -> false, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
         );
 
         DPAD_DOWN.whileActiveContinuous(
-                new IndexCommand(feeder, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
+                new IntakeCommand(feeder, () -> false, 0, Constants.Feeder.DEFAULT_INDEX_POWER)
         );
 
 //        rightTrigger.whileActiveContinuous(

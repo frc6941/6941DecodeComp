@@ -24,10 +24,9 @@ public class CloseShootCommand extends SequentialCommandGroup {
                 }),
                 new RepeatCommand(
                         new SequentialCommandGroup(
-                                new WaitUntilCommand(() -> trigger.get() || shooter.atTargetRpm()),
+                                new WaitUntilCommand(() -> trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
-                                new WaitCommand(20),
-                                new WaitUntilCommand(() -> !shooter.atTargetRpm()),
+                                new WaitUntilCommand(() -> !trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(0))
                         )).perpetually()
         );

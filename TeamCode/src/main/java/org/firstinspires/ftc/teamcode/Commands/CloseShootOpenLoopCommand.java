@@ -28,7 +28,6 @@ public class CloseShootOpenLoopCommand extends SequentialCommandGroup {
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(() -> trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(Constants.Feeder.DEFAULT_INDEX_POWER)),
-                                new WaitCommand(20),
                                 new WaitUntilCommand(() -> !trigger.get()),
                                 new InstantCommand(() -> feeder.setIndexOpenLoop(0))
                         )).perpetually()
