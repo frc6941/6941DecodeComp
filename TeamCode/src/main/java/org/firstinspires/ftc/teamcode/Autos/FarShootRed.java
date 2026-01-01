@@ -64,9 +64,9 @@ public class FarShootRed extends CommandOpMode {
                         2.0,
                         telemetry
                 ),
-                new CloseShootOpenLoopCommand(shooter, feeder, 1.0, 5000),
+                new CloseShootOpenLoopCommand(shooter, feeder, 0.75, 1500),
                 //new CloseShootCommand(shooter, feeder, () -> 3000, 4000),
-                new GoToPoseCommand(drive, Constants.Field.STOP_RED_FAR, 0.5).withTimeout(7000)
+                new GoToPoseCommand(drive, Constants.Field.STOP_RED_FAR, 0.5).withTimeout(5000)
         ).andThen(
                 new InstantCommand(
                         () -> {
