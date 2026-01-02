@@ -38,7 +38,6 @@ public class CommandTeleOp extends CommandOpMode {
     private FeederSubsystem feeder;
     private GamepadEx driverRC;
     private LimelightSubsystem limelight;
-
     private BeamBreakSubsystem beamBreak;
 
     @Override
@@ -256,6 +255,8 @@ public class CommandTeleOp extends CommandOpMode {
                 )
 
         );
+
+        rightBumper.whileActiveContinuous(new IntakeCommand(feeder, () -> false, 1, 1));
         register(drive);
         register(shooter);
         register(feeder);

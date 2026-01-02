@@ -43,7 +43,7 @@ public final class Constants {
 
         // LockHeading（Dashboard 可通过 LockHeadingTuning 覆盖这些默认值）
         public static final double LOCK_HEADING_TURN_kP = 0.05;
-        public static final double LOCK_HEADING_TURN_kI = 0.0;
+        public static final double LOCK_HEADING_TURN_kI = 0.005;
         public static final double LOCK_HEADING_TURN_kD = 0.0;
         public static final double LOCK_HEADING_MAX_OUTPUT = 0.6;
         public static final double LOCK_HEADING_TARGET_DEG = 0.0;
