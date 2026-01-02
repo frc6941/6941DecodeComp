@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Subsystems.AutoShooterSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.ShooterSubsystem;
 
@@ -57,5 +58,9 @@ public class CloseShootCommand extends SequentialCommandGroup {
                         new InstantCommand(() -> feeder.setIndexOpenLoop(0)))
         );
         addRequirements(feeder, shooter);
+    }
+
+    public CloseShootCommand(AutoShooterSubsystem shooter, FeederSubsystem feeder, DoubleSupplier doubleSupplier, int timeMs) {
+        super();
     }
 }

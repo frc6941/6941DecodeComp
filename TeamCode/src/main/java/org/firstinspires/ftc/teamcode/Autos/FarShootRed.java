@@ -9,10 +9,12 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
+import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.CloseShootOpenLoopCommand;
 import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Subsystems.AutoShooterSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
@@ -24,7 +26,7 @@ import org.firstinspires.ftc.teamcode.display;
 public class FarShootRed extends CommandOpMode {
 
     private DriveSubsystem drive;
-    private ShooterSubsystem shooter;
+    private AutoShooterSubsystem shooter;
     private FeederSubsystem feeder;
     private LimelightSubsystem limelight;
 
@@ -32,7 +34,7 @@ public class FarShootRed extends CommandOpMode {
     public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new DriveSubsystem(hardwareMap, telemetry);
-        shooter = new ShooterSubsystem(hardwareMap, telemetry);
+        shooter = new AutoShooterSubsystem(hardwareMap, telemetry);
         feeder = new FeederSubsystem(hardwareMap);
         limelight = new LimelightSubsystem(hardwareMap);
 
@@ -42,7 +44,6 @@ public class FarShootRed extends CommandOpMode {
                             RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.RED);
                             drive.resetHeading();
                             drive.applyDriverAlliance(RobotStateRecoder.DriverAlliance.RED);
-                            drive.setPose(Constants.Field.RED_AUTO_START_POS);
                             drive.setFieldCentricEnabled(false);
                         }
                 ),
@@ -65,8 +66,7 @@ public class FarShootRed extends CommandOpMode {
                         2.0,
                         telemetry
                 ),
-                new CloseShootOpenLoopCommand(shooter, feeder, 0.75, 1500),
-                //new CloseShootCommand(shooter, feeder, () -> 3000, 4000),
+                new CloseShootCommand(shooter, feeder, () -> 4000, 4000),
                 new GoToPoseCommand(drive, Constants.Field.STOP_RED_FAR, 0.5).withTimeout(5000)
         ).andThen(
                 new InstantCommand(
