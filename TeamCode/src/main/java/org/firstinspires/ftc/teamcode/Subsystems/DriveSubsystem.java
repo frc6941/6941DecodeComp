@@ -172,8 +172,8 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     private double computeVisionGain(final double distanceMeters) {
-        double gain = 0.35 / (distanceMeters + 0.5);
-        return clamp(gain, 0.05, 0.6);
+        double gain = 0.45 / (distanceMeters + 0.5);
+        return clamp(gain, 0.05, 0.9);
     }
 
     private double lerp(final double a, final double b, final double t) {
@@ -213,12 +213,12 @@ public class DriveSubsystem extends SubsystemBase {
         );
     }
 
-    public void setFieldCentricEnabled(boolean fieldCentricEnabled) {
-        this.fieldCentricEnabled = fieldCentricEnabled;
-    }
-
     public boolean isFieldCentricEnabled() {
         return fieldCentricEnabled;
+    }
+
+    public void setFieldCentricEnabled(boolean fieldCentricEnabled) {
+        this.fieldCentricEnabled = fieldCentricEnabled;
     }
 
     public void applyDriverAlliance(final RobotStateRecoder.DriverAlliance alliance) {

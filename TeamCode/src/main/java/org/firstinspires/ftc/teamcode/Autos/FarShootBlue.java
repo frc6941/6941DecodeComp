@@ -10,11 +10,9 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
-import org.firstinspires.ftc.teamcode.Commands.CloseShootOpenLoopCommand;
 import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Constants;
-import org.firstinspires.ftc.teamcode.Subsystems.AutoShooterSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
@@ -26,7 +24,7 @@ import org.firstinspires.ftc.teamcode.display;
 public class FarShootBlue extends CommandOpMode {
 
     private DriveSubsystem drive;
-    private AutoShooterSubsystem shooter;
+    private ShooterSubsystem shooter;
     private FeederSubsystem feeder;
     private LimelightSubsystem limelight;
 
@@ -34,7 +32,7 @@ public class FarShootBlue extends CommandOpMode {
     public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new DriveSubsystem(hardwareMap, telemetry);
-        shooter = new AutoShooterSubsystem(hardwareMap, telemetry);
+        shooter = new ShooterSubsystem(hardwareMap, telemetry);
         feeder = new FeederSubsystem(hardwareMap);
         limelight = new LimelightSubsystem(hardwareMap);
 
@@ -44,7 +42,9 @@ public class FarShootBlue extends CommandOpMode {
                             RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
                             drive.resetHeading();
                             drive.applyDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
+                            drive.setPose(Constants.Field.BLUE_AUTO_START_POS);
                             drive.setFieldCentricEnabled(false);
+                            shooter.setTargetRpm(3950);
                         }
                 ),
                 new WaitCommand(2000),//vision sync
@@ -61,12 +61,12 @@ public class FarShootBlue extends CommandOpMode {
 
                             final double dx = goal.getX() - pose.getX();
                             final double dy = goal.getY() - pose.getY();
-                            return Math.toDegrees(Math.atan2(dy, dx)) - 10.0;
+                            return Math.toDegrees(Math.atan2(dy, dx));
                         },
                         2.0,
                         telemetry
                 ),
-                new CloseShootCommand(shooter, feeder, () -> 4000, 4000),
+                new CloseShootCommand(shooter, feeder, () -> 3950, 5000),
                 new GoToPoseCommand(drive, Constants.Field.STOP_BLUE_FAR, 0.5).withTimeout(7000)
         ).andThen(
                 new InstantCommand(

@@ -36,6 +36,7 @@ public class ShooterSubsystem extends SubsystemBase {
         follower.setDirection(Constants.Shooter.FOLLOWER_INVERTED ? DcMotorSimple.Direction.REVERSE : DcMotorSimple.Direction.FORWARD);
         leader.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         follower.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        setPIDF(ShooterPidTuning.kP, ShooterPidTuning.kI, ShooterPidTuning.kD, ShooterPidTuning.kF);
     }
 
     public void setOpenLoop(final double power) {
@@ -97,7 +98,6 @@ public class ShooterSubsystem extends SubsystemBase {
         if (telemetry != null) {
             telemetry.addData("heartBeat", leader.getPower());
         }
-        setPIDF(ShooterPidTuning.kP, ShooterPidTuning.kI, ShooterPidTuning.kD, ShooterPidTuning.kF);
         boolean withinTolerance = targetRpm > 0.0 && Math.abs(targetRpm - getVelocityRpm()) <= ShooterPidTuning.RPM_TOLERANCE;
         if (withinTolerance) {
             if (!wasWithinTolerance) {

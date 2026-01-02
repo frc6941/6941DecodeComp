@@ -65,6 +65,7 @@ public class LockHeadingCommand extends CommandBase {
 
     @Override
     public void end(final boolean interrupted) {
+        drive.drive(0, 0, 0);
     }
 
     @Override

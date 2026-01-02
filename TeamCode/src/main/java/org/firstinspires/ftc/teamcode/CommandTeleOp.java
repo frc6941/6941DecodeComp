@@ -10,6 +10,9 @@ import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RepeatCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -17,7 +20,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
-import org.firstinspires.ftc.teamcode.Commands.CloseShootOpenLoopCommand;
 import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
@@ -114,19 +116,16 @@ public class CommandTeleOp extends CommandOpMode {
                         RobotStateRecoder.ShootingPosition.CLOSE)));
 
         rightTrigger.whileActiveOnce(
-                new ConditionalCommand(
-                        new CloseShootCommand(shooter, feeder, rightBumper, () -> TARGET_RPM),
-
+                new SequentialCommandGroup(
                         new ConditionalCommand(
-                                new CloseShootCommand(shooter, feeder, rightBumper, () -> 4100),
-
-                                new CloseShootCommand(shooter, feeder, rightBumper, () -> 3200),
-
-
-                                () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
-                        ),
-                        () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
-                )
+                                new CloseShootCommand(shooter, feeder, rightBumper, () -> TARGET_RPM),
+                                new ConditionalCommand(
+                                        new CloseShootCommand(shooter, feeder, rightBumper, () -> 4300),
+                                        new CloseShootCommand(shooter, feeder, rightBumper, () -> 3300),
+                                        () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
+                                ),
+                                () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
+                        ))
         );
 
 //        rightTrigger.whileActiveOnce(
@@ -135,6 +134,8 @@ public class CommandTeleOp extends CommandOpMode {
 //        rightTrigger.whileActiveOnce(
 //                new CloseShootOpenLoopCommand(shooter, feeder, rightBumper)
 //        );
+
+
         leftTrigger.whileActiveContinuous(
                 new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), Constants.Feeder.DEFAULT_INTAKE_POWER, 0.6)
         );
@@ -158,23 +159,68 @@ public class CommandTeleOp extends CommandOpMode {
 //        );
 
         rightTrigger.whileActiveContinuous(
-                new LockHeadingCommand(
-                        drive,
-                        driverRC::getLeftX,
-                        driverRC::getLeftY,
-                        () -> {
-                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
-                                    ? Constants.Field.GOAL_BLUE
-                                    : Constants.Field.GOAL_RED;
-                            final Pose2d pose = drive.getPose();
+                new ConditionalCommand(
+                        new SequentialCommandGroup(
+                                new LockHeadingCommand(
+                                        drive,
+                                        driverRC::getLeftX,
+                                        driverRC::getLeftY,
+                                        () -> {
+                                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                                    ? Constants.Field.GOAL_BLUE
+                                                    : Constants.Field.GOAL_RED;
+                                            final Pose2d pose = drive.getPose();
 
-                            final double dx = goal.getX() - pose.getX();
-                            final double dy = goal.getY() - pose.getY();
-                            return Math.toDegrees(Math.atan2(dy, dx));
-                        },
-                        2.0,
-                        telemetry
+                                            final double dx = goal.getX() - pose.getX();
+                                            final double dy = goal.getY() - pose.getY();
+                                            return Math.toDegrees(Math.atan2(dy, dx));
+                                        },
+                                        1,
+                                        telemetry
+                                ),
+                                new LockHeadingCommand(
+                                        drive,
+                                        driverRC::getLeftX,
+                                        driverRC::getLeftY,
+                                        () -> {
+                                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                                    ? Constants.Field.GOAL_BLUE
+                                                    : Constants.Field.GOAL_RED;
+                                            final Pose2d pose = drive.getPose();
+
+                                            final double dx = goal.getX() - pose.getX();
+                                            final double dy = goal.getY() - pose.getY();
+                                            return Math.toDegrees(Math.atan2(dy, dx));
+                                        },
+                                        1,
+                                        telemetry
+                                ),
+                                new IntakeCommand(feeder, () -> false)
+                        ),
+                        new SequentialCommandGroup(
+                                new LockHeadingCommand(
+                                        drive,
+                                        driverRC::getLeftX,
+                                        driverRC::getLeftY,
+                                        () -> {
+                                            return RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                                    ? -90 - 53.1
+                                                    : 90 + 53.1;
+                                        },
+                                        1,
+                                        telemetry
+                                ),
+                                new RepeatCommand(
+                                        new SequentialCommandGroup(
+                                                new IntakeCommand(feeder, () -> false),
+                                                new WaitCommand(120),
+                                                new IntakeCommand(feeder, () -> false, 0.8, 0),
+                                                new WaitUntilCommand(shooter::atTargetRpm))
+                                )
+                        ),
+                        () -> RobotStateRecoder.getShootingPosition() != RobotStateRecoder.ShootingPosition.FAR
                 )
+
         );
         register(drive);
         register(shooter);
@@ -191,40 +237,35 @@ public class CommandTeleOp extends CommandOpMode {
         );
         shooter.setDefaultCommand(
                 new RepeatCommand(
-                        new InstantCommand(() -> shooter.setVelocityRpm(3200), shooter))
-        );
+                        new ConditionalCommand(
+                                new InstantCommand(() -> shooter.setVelocityRpm(TARGET_RPM), shooter),
+                                new ConditionalCommand(
+                                        new InstantCommand(() -> shooter.setVelocityRpm(4300), shooter),
+                                        new InstantCommand(() -> shooter.setVelocityRpm(3300), shooter),
+                                        () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
+                                ),
+                                () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
+                        )));
         feeder.setDefaultCommand(
                 new RunCommand(
-                        () -> feeder.stop(),
+                        () -> {
+                            feeder.stop();
+                        },
                         feeder
                 )
         );
 
-        if (RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.RED) {
-            buttonX.whileActiveOnce(
-                    new ConditionalCommand(
-                            new GoToPoseCommand(drive, Constants.Field.GOAL_RED_CLOSE, 0.5),
-                            new ConditionalCommand(
-                                    new GoToPoseCommand(drive, Constants.Field.GOAL_RED_FAR, 0.5),
-                                    new GoToPoseCommand(drive, Constants.Field.GOAL_RED_MIDDLE, 0.5),
-                                    () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
-                            ),
-                            () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
-                    )
-            );
-        } else {
-            buttonX.whileActiveOnce(
-                    new ConditionalCommand(
-                            new GoToPoseCommand(drive, Constants.Field.GOAL_BLUE_CLOSE, 0.5),
-                            new ConditionalCommand(
-                                    new GoToPoseCommand(drive, Constants.Field.GOAL_BLUE_FAR, 0.5),
-                                    new GoToPoseCommand(drive, Constants.Field.GOAL_BLUE_MIDDLE, 0.5),
-                                    () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
-                            ),
-                            () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.CLOSE
-                    )
-            );
-        }
+
+        buttonX.whileActiveOnce(
+                new GoToPoseCommand(
+                        drive,
+                        new Pose2d(
+                                drive.getPose().getX(),
+                                drive.getPose().getY(),
+                                90),
+                        0.5)
+        );
+
         drive.setFieldCentricEnabled(true);
 
     }

@@ -10,7 +10,6 @@ public final class Constants {
     }
 
     public static final class Drive {
-
         public static final String FRONT_LEFT_NAME = "LF";
         public static final String FRONT_RIGHT_NAME = "RF";
         public static final String BACK_LEFT_NAME = "LB";
@@ -129,8 +128,8 @@ public final class Constants {
 
     public final static class Field {
 
-        public static final Pose2d GOAL_BLUE = new Pose2d(-60, -60, 0);
-        public static final Pose2d GOAL_RED = new Pose2d(-60, +60, 0);
+        public static final Pose2d GOAL_BLUE = new Pose2d(-70, -70, 0);
+        public static final Pose2d GOAL_RED = new Pose2d(-70, +70, 0);
 
         public static final Pose2d GOAL_BLUE_CLOSE = new Pose2d(-20, -20, 0);
         public static final Pose2d GOAL_RED_CLOSE = new Pose2d(-20, +20, 0);
@@ -140,5 +139,8 @@ public final class Constants {
         public static final Pose2d GOAL_RED_FAR = new Pose2d(+20, +20, 0);
         public static final Pose2d STOP_BLUE_FAR = new Pose2d(+50, -30, 0);
         public static final Pose2d STOP_RED_FAR = new Pose2d(50, +30, 0);
+
+        public static final Pose2d RED_AUTO_START_POS = new Pose2d(61.5, 22, 0);//70-8.5
+        public static final Pose2d BLUE_AUTO_START_POS = new Pose2d(61.5, -22, 0);//70-8.5
     }
 }
