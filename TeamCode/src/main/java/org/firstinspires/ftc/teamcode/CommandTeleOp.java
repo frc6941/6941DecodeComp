@@ -119,7 +119,7 @@ public class CommandTeleOp extends CommandOpMode {
                         new ConditionalCommand(
                                 new CloseShootCommand(shooter, feeder, rightBumper, () -> TARGET_RPM),
                                 new ConditionalCommand(
-                                        new CloseShootCommand(shooter, feeder, rightBumper, () -> 4300),
+                                        new CloseShootCommand(shooter, feeder, rightBumper, () -> 4250),
                                         new CloseShootCommand(shooter, feeder, rightBumper, () -> 3300),
                                         () -> RobotStateRecoder.getShootingPosition() == RobotStateRecoder.ShootingPosition.FAR
                                 ),
