@@ -140,5 +140,8 @@ public final class Constants {
         public static final Pose2d GOAL_RED_FAR = new Pose2d(+20, +20, 0);
         public static final Pose2d STOP_BLUE_FAR = new Pose2d(+50, -30, 0);
         public static final Pose2d STOP_RED_FAR = new Pose2d(50, +30, 0);
+
+        public static final Pose2d RED_AUTO_START_POS = new Pose2d(61.5, -20, 0);//70-8.5
+        public static final Pose2d BLUE_AUTO_START_POS = new Pose2d(61.5, 20, 0);//70-8.5
     }
 }

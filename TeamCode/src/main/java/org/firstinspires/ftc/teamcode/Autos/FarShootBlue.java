@@ -41,6 +41,7 @@ public class FarShootBlue extends CommandOpMode {
                         () -> {
                             RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
                             drive.resetHeading();
+                            drive.setPose(Constants.Field.BLUE_AUTO_START_POS);
                             drive.applyDriverAlliance(RobotStateRecoder.DriverAlliance.BLUE);
                             drive.setFieldCentricEnabled(false);
                         }

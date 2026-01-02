@@ -42,6 +42,7 @@ public class FarShootRed extends CommandOpMode {
                             RobotStateRecoder.setDriverAlliance(RobotStateRecoder.DriverAlliance.RED);
                             drive.resetHeading();
                             drive.applyDriverAlliance(RobotStateRecoder.DriverAlliance.RED);
+                            drive.setPose(Constants.Field.RED_AUTO_START_POS);
                             drive.setFieldCentricEnabled(false);
                         }
                 ),
