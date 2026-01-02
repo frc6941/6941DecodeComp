@@ -5,12 +5,14 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
 import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
+import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
@@ -67,7 +69,59 @@ public class FarShootBlue extends CommandOpMode {
                         telemetry
                 ),
                 new CloseShootCommand(shooter, feeder, () -> 3950, 5000),
-                new GoToPoseCommand(drive, Constants.Field.STOP_BLUE_FAR, 0.5).withTimeout(7000)
+                //new GoToPoseCommand(drive, Constants.Field.STOP_BLUE_FAR, 0.5).withTimeout(7000)
+                new GoToPoseCommand(drive, Constants.Field.BLUE_INTAKE_START_POS, 0.5),
+                new LockHeadingCommand(
+                        drive,
+                        () -> 0,
+                        () -> 0,
+                        () -> RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                ? -90
+                                : 90
+                        ,
+                        2.0,
+                        telemetry
+                ),
+                new ParallelDeadlineGroup(
+                        new GoToPoseCommand(drive, Constants.Field.BLUE_INTAKE_END_POS, 0.5),
+                        new IntakeCommand(feeder, () -> false)
+                ),
+                new LockHeadingCommand(
+                        drive,
+                        () -> 0,
+                        () -> 0,
+                        () -> {
+                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                    ? Constants.Field.GOAL_BLUE
+                                    : Constants.Field.GOAL_RED;
+                            final Pose2d pose = drive.getPose();
+
+                            final double dx = goal.getX() - pose.getX();
+                            final double dy = goal.getY() - pose.getY();
+                            return Math.toDegrees(Math.atan2(dy, dx));
+                        },
+                        2.0,
+                        telemetry
+                ),
+                new GoToPoseCommand(drive, Constants.Field.BLUE_AUTO_START_POS, 0.5),
+                new LockHeadingCommand(
+                        drive,
+                        () -> 0,
+                        () -> 0,
+                        () -> {
+                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                    ? Constants.Field.GOAL_BLUE
+                                    : Constants.Field.GOAL_RED;
+                            final Pose2d pose = drive.getPose();
+
+                            final double dx = goal.getX() - pose.getX();
+                            final double dy = goal.getY() - pose.getY();
+                            return Math.toDegrees(Math.atan2(dy, dx));
+                        },
+                        2.0,
+                        telemetry
+                ),
+                new CloseShootCommand(shooter, feeder, () -> 3950, 5000)
         ).andThen(
                 new InstantCommand(
                         () -> {

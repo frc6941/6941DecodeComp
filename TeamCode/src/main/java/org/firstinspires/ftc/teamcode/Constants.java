@@ -131,6 +131,12 @@ public final class Constants {
         public static final Pose2d GOAL_BLUE = new Pose2d(-70, -70, 0);
         public static final Pose2d GOAL_RED = new Pose2d(-70, +70, 0);
 
+        public static final Pose2d BLUE_INTAKE_START_POS = new Pose2d(35, 23, 0);
+        public static final Pose2d RED_INTAKE_START_POS = new Pose2d(35, -23, 0);
+
+        public static final Pose2d BLUE_INTAKE_END_POS = new Pose2d(35, 53, 0);
+        public static final Pose2d RED_INTAKE_END_POS = new Pose2d(35, -53, 0);
+
         public static final Pose2d GOAL_BLUE_CLOSE = new Pose2d(-20, -20, 0);
         public static final Pose2d GOAL_RED_CLOSE = new Pose2d(-20, +20, 0);
         public static final Pose2d GOAL_BLUE_MIDDLE = new Pose2d(-0, -0, 0);
