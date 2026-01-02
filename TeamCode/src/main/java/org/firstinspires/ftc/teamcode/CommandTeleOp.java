@@ -198,14 +198,48 @@ public class CommandTeleOp extends CommandOpMode {
                                 new IntakeCommand(feeder, () -> false)
                         ),
                         new SequentialCommandGroup(
+//                                new LockHeadingCommand(
+//                                        drive,
+//                                        driverRC::getLeftX,
+//                                        driverRC::getLeftY,
+//                                        () -> {
+//                                            return RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+//                                                    ? -90 - 53.1
+//                                                    : 90 + 53.1;
+//                                        },
+//                                        1,
+//                                        telemetry
+//                                ),
                                 new LockHeadingCommand(
                                         drive,
                                         driverRC::getLeftX,
                                         driverRC::getLeftY,
                                         () -> {
-                                            return RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
-                                                    ? -90 - 53.1
-                                                    : 90 + 53.1;
+                                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                                    ? Constants.Field.GOAL_BLUE
+                                                    : Constants.Field.GOAL_RED;
+                                            final Pose2d pose = drive.getPose();
+
+                                            final double dx = goal.getX() - pose.getX();
+                                            final double dy = goal.getY() - pose.getY();
+                                            return Math.toDegrees(Math.atan2(dy, dx));
+                                        },
+                                        1,
+                                        telemetry
+                                ),
+                                new LockHeadingCommand(
+                                        drive,
+                                        driverRC::getLeftX,
+                                        driverRC::getLeftY,
+                                        () -> {
+                                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
+                                                    ? Constants.Field.GOAL_BLUE
+                                                    : Constants.Field.GOAL_RED;
+                                            final Pose2d pose = drive.getPose();
+
+                                            final double dx = goal.getX() - pose.getX();
+                                            final double dy = goal.getY() - pose.getY();
+                                            return Math.toDegrees(Math.atan2(dy, dx));
                                         },
                                         1,
                                         telemetry

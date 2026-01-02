@@ -11,10 +11,12 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Commands.CloseShootCommand;
+import org.firstinspires.ftc.teamcode.Commands.DriveForTimeCommand;
 import org.firstinspires.ftc.teamcode.Commands.GoToPoseCommand;
 import org.firstinspires.ftc.teamcode.Commands.IntakeCommand;
 import org.firstinspires.ftc.teamcode.Commands.LockHeadingCommand;
 import org.firstinspires.ftc.teamcode.Constants;
+import org.firstinspires.ftc.teamcode.Subsystems.BeamBreakSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.FeederSubsystem;
 import org.firstinspires.ftc.teamcode.Subsystems.LimelightSubsystem;
@@ -29,6 +31,7 @@ public class FarShootBlue extends CommandOpMode {
     private ShooterSubsystem shooter;
     private FeederSubsystem feeder;
     private LimelightSubsystem limelight;
+    private BeamBreakSubsystem beamBreak;
 
     @Override
     public void initialize() {
@@ -37,6 +40,7 @@ public class FarShootBlue extends CommandOpMode {
         shooter = new ShooterSubsystem(hardwareMap, telemetry);
         feeder = new FeederSubsystem(hardwareMap);
         limelight = new LimelightSubsystem(hardwareMap);
+        beamBreak = new BeamBreakSubsystem(hardwareMap, "shooterBB", 1.0);
 
         schedule(new SequentialCommandGroup(
                 new InstantCommand(
@@ -69,23 +73,69 @@ public class FarShootBlue extends CommandOpMode {
                         telemetry
                 ),
                 new CloseShootCommand(shooter, feeder, () -> 3950, 5000),
-                //new GoToPoseCommand(drive, Constants.Field.STOP_BLUE_FAR, 0.5).withTimeout(7000)
-                new GoToPoseCommand(drive, Constants.Field.BLUE_INTAKE_START_POS, 0.5),
+                new InstantCommand(
+                        () -> {
+                            drive.setFieldCentricEnabled(true);
+                        }
+                ),
                 new LockHeadingCommand(
                         drive,
                         () -> 0,
                         () -> 0,
                         () -> RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
-                                ? -90
-                                : 90
-                        ,
+                                ? 90 : -90,
                         2.0,
                         telemetry
                 ),
                 new ParallelDeadlineGroup(
-                        new GoToPoseCommand(drive, Constants.Field.BLUE_INTAKE_END_POS, 0.5),
-                        new IntakeCommand(feeder, () -> false)
+                        new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), 1, 0).withTimeout(5000),
+                        new DriveForTimeCommand(
+                                drive,
+                                -0.3,
+                                0.7,
+                                0,
+                                5
+                        )
                 ),
+
+                new ParallelDeadlineGroup(
+                        new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), 1, 0).withTimeout(1500),
+                        new SequentialCommandGroup(
+                                new DriveForTimeCommand(
+                                        drive,
+                                        -0.2,
+                                        -0.5,
+                                        0,
+                                        0.5
+                                ),
+                                new DriveForTimeCommand(
+                                        drive,
+                                        -0.2,
+                                        0.5,
+                                        0,
+                                        1
+                                ))
+                ),
+
+                new ParallelDeadlineGroup(
+                        new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), 1, 0).withTimeout(1500),
+                        new SequentialCommandGroup(
+                                new DriveForTimeCommand(
+                                        drive,
+                                        -0.2,
+                                        -0.5,
+                                        0,
+                                        0.5
+                                ),
+                                new DriveForTimeCommand(
+                                        drive,
+                                        -0.2,
+                                        0.5,
+                                        0,
+                                        1
+                                ))
+                ),
+                new GoToPoseCommand(drive, Constants.Field.BLUE_AUTO_START_POS, 0.5).withTimeout(5000),
                 new LockHeadingCommand(
                         drive,
                         () -> 0,
@@ -103,25 +153,8 @@ public class FarShootBlue extends CommandOpMode {
                         2.0,
                         telemetry
                 ),
-                new GoToPoseCommand(drive, Constants.Field.BLUE_AUTO_START_POS, 0.5),
-                new LockHeadingCommand(
-                        drive,
-                        () -> 0,
-                        () -> 0,
-                        () -> {
-                            final Pose2d goal = RobotStateRecoder.getDriverAlliance() == RobotStateRecoder.DriverAlliance.BLUE
-                                    ? Constants.Field.GOAL_BLUE
-                                    : Constants.Field.GOAL_RED;
-                            final Pose2d pose = drive.getPose();
-
-                            final double dx = goal.getX() - pose.getX();
-                            final double dy = goal.getY() - pose.getY();
-                            return Math.toDegrees(Math.atan2(dy, dx));
-                        },
-                        2.0,
-                        telemetry
-                ),
-                new CloseShootCommand(shooter, feeder, () -> 3950, 5000)
+                new CloseShootCommand(shooter, feeder, () -> 3950, 5000),
+                new GoToPoseCommand(drive, Constants.Field.STOP_BLUE_FAR, 0.5)
         ).andThen(
                 new InstantCommand(
                         () -> {
@@ -150,6 +183,7 @@ public class FarShootBlue extends CommandOpMode {
         telemetry.addData("shooting Position", RobotStateRecoder.getShootingPosition());
         telemetry.addData("Driver Input Offset (deg)", drive.getDriverInputOffsetDeg());
         telemetry.addData("Shooter Rpm", shooter.getVelocityRpm());
+        telemetry.addData("BB", beamBreak.getVoltage());
 
         Pose2d pose = drive.getPose();
         Pose2d ghost = limelight.getPoseEstimate().orElse(null);
