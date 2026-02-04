@@ -27,15 +27,15 @@ public class IntakeCommand extends CommandBase {
 
     @Override
     public void initialize() {
+        boolean beamBlocked = breamBreak.getAsBoolean();
         feeder.setIntakeOpenLoop(intakePower);
-        feeder.setIndexOpenLoop(indexPower);
+        feeder.setIndexOpenLoop(beamBlocked ? 0.0 : indexPower);
     }
 
     @Override
     public void execute() {
-        if (breamBreak.getAsBoolean()) {
-            feeder.setIndexOpenLoop(0.0);
-        }
+        boolean beamBlocked = breamBreak.getAsBoolean();
+        feeder.setIndexOpenLoop(beamBlocked ? 0.0 : indexPower);
     }
 
 
@@ -49,4 +49,3 @@ public class IntakeCommand extends CommandBase {
         return false;
     }
 }
-

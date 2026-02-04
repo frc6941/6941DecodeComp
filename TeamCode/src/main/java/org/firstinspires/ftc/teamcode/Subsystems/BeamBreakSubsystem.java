@@ -20,7 +20,7 @@ public class BeamBreakSubsystem extends SubsystemBase {
     }
 
     public boolean isBeamBreakOn(double toleranceVoltage) {
-        return beamBreak.getVoltage() >= toleranceVoltage;
+        return beamBreak.getVoltage() <= toleranceVoltage;
     }
 
     public double getVoltage() {
