@@ -13,7 +13,7 @@ public class IntakeCommand extends CommandBase {
     private BooleanSupplier breamBreak;
     private double intakePower, indexPower;
     private static final long INDEX_FEED_PULSE_MS = 180L;
-    private static final double INDEX_FEED_PULSE_POWER_INTAKE = 0.0;
+    private static final double INDEX_FEED_PULSE_POWER_INTAKE = 0.12;
     private static final double INDEX_FEED_PULSE_POWER_ACTIVE = 0.6;
 
     private boolean beamBlockedLatched;
