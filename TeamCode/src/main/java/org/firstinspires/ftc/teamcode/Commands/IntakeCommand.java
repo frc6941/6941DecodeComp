@@ -46,6 +46,10 @@ public class IntakeCommand extends CommandBase {
 
         if (!beamBlocked) {
             beamBlockedLatched = false;
+            indexFeedUntilNanos = 0L;
+            feeder.setIntakeOpenLoop(intakePower);
+            feeder.setIndexOpenLoop(indexPower);
+            return;
         }
 
         if (beamBlocked && !beamBlockedLatched) {
