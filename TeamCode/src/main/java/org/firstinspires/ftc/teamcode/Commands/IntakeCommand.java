@@ -14,7 +14,7 @@ public class IntakeCommand extends CommandBase {
     private double intakePower, indexPower;
     private static final long INDEX_FEED_PULSE_MS = 260L;
 
-    private boolean previousBeamBlocked;
+    private boolean beamBlockedLatched;
     private long indexFeedUntilNanos;
 
     public IntakeCommand(final FeederSubsystem feeder, BooleanSupplier breamBreak) {
@@ -31,7 +31,7 @@ public class IntakeCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        previousBeamBlocked = breamBreak.getAsBoolean();
+        beamBlockedLatched = false;
         indexFeedUntilNanos = 0L;
 
         feeder.setIntakeOpenLoop(intakePower);
@@ -43,16 +43,19 @@ public class IntakeCommand extends CommandBase {
         final boolean beamBlocked = breamBreak.getAsBoolean();
         final long nowNanos = System.nanoTime();
 
-        if (beamBlocked && !previousBeamBlocked) {
+        if (!beamBlocked) {
+            beamBlockedLatched = false;
+        }
+
+        if (beamBlocked && !beamBlockedLatched) {
             indexFeedUntilNanos = nowNanos + INDEX_FEED_PULSE_MS * 1_000_000L;
+            beamBlockedLatched = true;
         }
 
         final boolean shouldFeedIndexer = nowNanos < indexFeedUntilNanos;
 
         feeder.setIntakeOpenLoop(intakePower);
         feeder.setIndexOpenLoop(shouldFeedIndexer ? indexPower : 0.0);
-
-        previousBeamBlocked = beamBlocked;
     }
 
 
