@@ -13,7 +13,8 @@ public class IntakeCommand extends CommandBase {
     private BooleanSupplier breamBreak;
     private double intakePower, indexPower;
     private static final long INDEX_FEED_PULSE_MS = 180L;
-    private static final double INDEX_FEED_PULSE_POWER = 0.6;
+    private static final double INDEX_FEED_PULSE_POWER_INTAKE = 0.35;
+    private static final double INDEX_FEED_PULSE_POWER_ACTIVE = 0.6;
 
     private boolean beamBlockedLatched;
     private long indexFeedUntilNanos;
@@ -66,11 +67,11 @@ public class IntakeCommand extends CommandBase {
 
     private double getIndexPulsePower() {
         if (Math.abs(indexPower) < 1e-6) {
-            return INDEX_FEED_PULSE_POWER;
+            return INDEX_FEED_PULSE_POWER_INTAKE;
         }
 
         return Math.copySign(
-                Math.min(Math.abs(indexPower), INDEX_FEED_PULSE_POWER),
+                Math.min(Math.abs(indexPower), INDEX_FEED_PULSE_POWER_ACTIVE),
                 indexPower
         );
     }

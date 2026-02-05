@@ -136,7 +136,7 @@ public class CommandTeleOp extends CommandOpMode {
 
 
         leftTrigger.whileActiveContinuous(
-                new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), Constants.Feeder.DEFAULT_INTAKE_POWER, 0.6)
+                new IntakeCommand(feeder, () -> beamBreak.isBeamBreakOn(), Constants.Feeder.DEFAULT_INTAKE_POWER, 0)
         );
         leftBumper.whileActiveContinuous(
                 new IntakeCommand(feeder, () -> false, -Constants.Feeder.DEFAULT_INTAKE_POWER, -Constants.Feeder.DEFAULT_INDEX_POWER)
