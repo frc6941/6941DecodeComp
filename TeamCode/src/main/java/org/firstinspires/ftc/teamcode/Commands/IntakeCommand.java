@@ -12,7 +12,8 @@ public class IntakeCommand extends CommandBase {
     private final FeederSubsystem feeder;
     private BooleanSupplier breamBreak;
     private double intakePower, indexPower;
-    private static final long INDEX_FEED_PULSE_MS = 260L;
+    private static final long INDEX_FEED_PULSE_MS = 180L;
+    private static final double INDEX_FEED_PULSE_POWER = 0.35;
 
     private boolean beamBlockedLatched;
     private long indexFeedUntilNanos;
@@ -53,9 +54,21 @@ public class IntakeCommand extends CommandBase {
         }
 
         final boolean shouldFeedIndexer = nowNanos < indexFeedUntilNanos;
+        final double indexPulsePower = getIndexPulsePower();
 
         feeder.setIntakeOpenLoop(intakePower);
-        feeder.setIndexOpenLoop(shouldFeedIndexer ? indexPower : 0.0);
+        feeder.setIndexOpenLoop(shouldFeedIndexer ? indexPulsePower : 0.0);
+    }
+
+    private double getIndexPulsePower() {
+        if (Math.abs(indexPower) < 1e-6) {
+            return INDEX_FEED_PULSE_POWER;
+        }
+
+        return Math.copySign(
+                Math.min(Math.abs(indexPower), INDEX_FEED_PULSE_POWER),
+                indexPower
+        );
     }
 
 
